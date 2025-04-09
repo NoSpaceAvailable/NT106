@@ -8,3 +8,13 @@ D:\CourseUIT\LapTrinhMangCanBan\FinalProject\obj\Debug\FinalProject.csproj.Gener
 D:\CourseUIT\LapTrinhMangCanBan\FinalProject\obj\Debug\FinalProject.csproj.CoreCompileInputs.cache
 D:\CourseUIT\LapTrinhMangCanBan\FinalProject\obj\Debug\FinalProject.exe
 D:\CourseUIT\LapTrinhMangCanBan\FinalProject\obj\Debug\FinalProject.pdb
+F:\tailieudaihoc\laptrinhmang\doan\NT106\FinalProject\bin\Debug\FinalProject.exe.config
+F:\tailieudaihoc\laptrinhmang\doan\NT106\FinalProject\bin\Debug\FinalProject.exe
+F:\tailieudaihoc\laptrinhmang\doan\NT106\FinalProject\bin\Debug\FinalProject.pdb
+F:\tailieudaihoc\laptrinhmang\doan\NT106\FinalProject\obj\Debug\FinalProject.csproj.AssemblyReference.cache
+F:\tailieudaihoc\laptrinhmang\doan\NT106\FinalProject\obj\Debug\FinalProject.MainForm.resources
+F:\tailieudaihoc\laptrinhmang\doan\NT106\FinalProject\obj\Debug\FinalProject.Properties.Resources.resources
+F:\tailieudaihoc\laptrinhmang\doan\NT106\FinalProject\obj\Debug\FinalProject.csproj.GenerateResource.cache
+F:\tailieudaihoc\laptrinhmang\doan\NT106\FinalProject\obj\Debug\FinalProject.csproj.CoreCompileInputs.cache
+F:\tailieudaihoc\laptrinhmang\doan\NT106\FinalProject\obj\Debug\FinalProject.exe
+F:\tailieudaihoc\laptrinhmang\doan\NT106\FinalProject\obj\Debug\FinalProject.pdb

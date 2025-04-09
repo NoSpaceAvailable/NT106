@@ -1,10 +1,18 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\CourseUIT\\LapTrinhMangCanBan\\FinalProject\\",
+  "WorkspaceRootPath": "F:\\tailieudaihoc\\laptrinhmang\\doan\\NT106\\FinalProject\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|d:\\courseuit\\laptrinhmangcanban\\finalproject\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|f:\\tailieudaihoc\\laptrinhmang\\doan\\nt106\\finalproject\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|solutionrelative:mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|f:\\tailieudaihoc\\laptrinhmang\\doan\\nt106\\finalproject\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|solutionrelative:mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|f:\\tailieudaihoc\\laptrinhmang\\doan\\nt106\\finalproject\\mainform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|solutionrelative:mainform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,16 +22,50 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 2,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e5c86464-96be-4d7c-9a8b-abcb3bbf5f92}"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "MainForm.cs [Design]",
-              "DocumentMoniker": "D:\\CourseUIT\\LapTrinhMangCanBan\\FinalProject\\MainForm.cs",
+              "Title": "MainForm.cs",
+              "DocumentMoniker": "F:\\tailieudaihoc\\laptrinhmang\\doan\\NT106\\FinalProject\\MainForm.cs",
               "RelativeDocumentMoniker": "MainForm.cs",
-              "ToolTip": "D:\\CourseUIT\\LapTrinhMangCanBan\\FinalProject\\MainForm.cs [Design]*",
-              "RelativeToolTip": "MainForm.cs [Design]*",
+              "ToolTip": "F:\\tailieudaihoc\\laptrinhmang\\doan\\NT106\\FinalProject\\MainForm.cs",
+              "RelativeToolTip": "MainForm.cs",
+              "ViewState": "AgIAACEAAAAAAAAAAAAYwDYAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-09T18:42:52.739Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MainForm.Designer.cs",
+              "DocumentMoniker": "F:\\tailieudaihoc\\laptrinhmang\\doan\\NT106\\FinalProject\\MainForm.Designer.cs",
+              "RelativeDocumentMoniker": "MainForm.Designer.cs",
+              "ToolTip": "F:\\tailieudaihoc\\laptrinhmang\\doan\\NT106\\FinalProject\\MainForm.Designer.cs",
+              "RelativeToolTip": "MainForm.Designer.cs",
+              "ViewState": "AgIAABkAAAAAAAAAAAAQwEEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-09T18:42:46.501Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainForm.cs [Design]",
+              "DocumentMoniker": "F:\\tailieudaihoc\\laptrinhmang\\doan\\NT106\\FinalProject\\MainForm.cs",
+              "RelativeDocumentMoniker": "MainForm.cs",
+              "ToolTip": "F:\\tailieudaihoc\\laptrinhmang\\doan\\NT106\\FinalProject\\MainForm.cs [Design]",
+              "RelativeToolTip": "MainForm.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-04-09T11:40:02.874Z",
               "EditorCaption": " [Design]"
