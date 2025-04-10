@@ -20,6 +20,7 @@ namespace FinalProject
         private BufferedGraphics bufferedGraphics;
         private Point previousPoint;
         private bool isDrawing = false;
+        private string selectedButton = null;
 
         public MainForm()
         {
@@ -27,6 +28,7 @@ namespace FinalProject
             LoadColorPalette();
             SetupBrushSizeMenu();
             UpdateCursor();
+            LoadTools();
             InitializeBufferedGraphics();
         }
 
@@ -80,6 +82,27 @@ namespace FinalProject
             DrawingArea.Cursor = customCursor;
         }
 
+        private void LoadTools()
+        {
+            int buttonSize = 30;
+
+            // Add an eraser button to the ToolsPanel
+            Button eraserButton = new Button();
+            Bitmap eraserImage = new Bitmap(@"../../Images/EraserIcon.png");
+            eraserButton.Image = new Bitmap(eraserImage, new Size(buttonSize, buttonSize));
+            eraserButton.Width = buttonSize;
+            eraserButton.Height = buttonSize;
+            eraserButton.Left = (1 % 8) * (buttonSize + 5);
+            eraserButton.Top = (1 / 8) * (buttonSize + 5);
+            eraserButton.FlatStyle = FlatStyle.Flat;
+            eraserButton.FlatAppearance.BorderSize = 0;
+            eraserButton.Tag = Color.White; // Set the eraser color to white
+            eraserButton.Click += toolsSelection_Click;
+            eraserButton.MouseEnter += ColorBtn_MouseEnter;
+            eraserButton.MouseLeave += ColorBtn_MouseLeave;
+            ToolsPanel.Controls.Add(eraserButton);
+        }
+
         private void LoadColorPalette()
         {
             Color[] colors = new Color[]
@@ -124,6 +147,12 @@ namespace FinalProject
         private void ColorBtn_MouseLeave(object sender, EventArgs e)
         {
             Cursor = Cursors.Default;
+        }
+
+        private void toolsSelection_Click(object sender, EventArgs e)
+        {
+            selectedColor = Color.White;
+            UpdateCursor();
         }
 
         private void customColorButton_Click(object sender, EventArgs e)
@@ -203,6 +232,12 @@ namespace FinalProject
                 InitializeBufferedGraphics();
                 bufferedGraphics.Render(DrawingArea.CreateGraphics());
             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            RemoteColorEditor remoteColorEditor = new RemoteColorEditor();
+            remoteColorEditor.Show();
         }
     }
 }

@@ -28,3 +28,4 @@ D:\CourseUIT\LapTrinhMangCanBan\NT106\FinalProject\obj\Debug\FinalProject.csproj
 D:\CourseUIT\LapTrinhMangCanBan\NT106\FinalProject\obj\Debug\FinalProject.csproj.CoreCompileInputs.cache
 D:\CourseUIT\LapTrinhMangCanBan\NT106\FinalProject\obj\Debug\FinalProject.exe
 D:\CourseUIT\LapTrinhMangCanBan\NT106\FinalProject\obj\Debug\FinalProject.pdb
+D:\CourseUIT\LapTrinhMangCanBan\NT106\FinalProject\obj\Debug\FinalProject.RemoteColorEditor.resources

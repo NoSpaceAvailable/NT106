@@ -34,6 +34,8 @@ namespace FinalProject
             this.DrawingArea = new System.Windows.Forms.PictureBox();
             this.CursorSizeAdjust = new System.Windows.Forms.TrackBar();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.ToolsPanel = new System.Windows.Forms.Panel();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.DrawingArea)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.CursorSizeAdjust)).BeginInit();
             this.SuspendLayout();
@@ -65,12 +67,30 @@ namespace FinalProject
             // 
             this.CursorSizeAdjust.AutoSize = false;
             this.CursorSizeAdjust.CausesValidation = false;
-            this.CursorSizeAdjust.Location = new System.Drawing.Point(17, 104);
+            this.CursorSizeAdjust.Location = new System.Drawing.Point(17, 100);
             this.CursorSizeAdjust.Margin = new System.Windows.Forms.Padding(2);
             this.CursorSizeAdjust.Name = "CursorSizeAdjust";
-            this.CursorSizeAdjust.Size = new System.Drawing.Size(187, 17);
+            this.CursorSizeAdjust.Size = new System.Drawing.Size(187, 21);
             this.CursorSizeAdjust.TabIndex = 2;
             this.CursorSizeAdjust.TickStyle = System.Windows.Forms.TickStyle.None;
+            // 
+            // ToolsPanel
+            // 
+            this.ToolsPanel.Location = new System.Drawing.Point(486, 15);
+            this.ToolsPanel.Name = "ToolsPanel";
+            this.ToolsPanel.Size = new System.Drawing.Size(200, 81);
+            this.ToolsPanel.TabIndex = 3;
+            // 
+            // button1
+            // 
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button1.Location = new System.Drawing.Point(1065, 12);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 4;
+            this.button1.Text = "RCE";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // MainForm
             // 
@@ -78,6 +98,8 @@ namespace FinalProject
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ButtonHighlight;
             this.ClientSize = new System.Drawing.Size(1155, 712);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.ToolsPanel);
             this.Controls.Add(this.CursorSizeAdjust);
             this.Controls.Add(this.DrawingArea);
             this.Controls.Add(this.ColorsPanel);
@@ -97,6 +119,8 @@ namespace FinalProject
         private System.Windows.Forms.PictureBox DrawingArea;
         private TrackBar CursorSizeAdjust;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private Panel ToolsPanel;
+        private Button button1;
     }
 }
 
