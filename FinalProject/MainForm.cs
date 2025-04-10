@@ -3,43 +3,57 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-
 namespace FinalProject
 {
-    public partial class MainForm: Form
+    public partial class MainForm : Form
     {
         private Color selectedColor = Color.Black;
-        private Button customcoButton; // Button for custom color selection like you can type hex value on that and change color to that value
+        private Button customColorButton;
         private int penWidth = 10;
+        private BufferedGraphicsContext context;
+        private BufferedGraphics bufferedGraphics;
+        private Point previousPoint;
+        private bool isDrawing = false;
+
         public MainForm()
         {
             InitializeComponent();
             LoadColorPalette();
             SetupBrushSizeMenu();
             UpdateCursor();
+            InitializeBufferedGraphics();
+        }
+
+        private void InitializeBufferedGraphics()
+        {
+            context = BufferedGraphicsManager.Current;
+            context.MaximumBuffer = new Size(DrawingArea.Width + 1, DrawingArea.Height + 1);
+            bufferedGraphics = context.Allocate(DrawingArea.CreateGraphics(),
+                new Rectangle(0, 0, DrawingArea.Width, DrawingArea.Height));
+            bufferedGraphics.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            bufferedGraphics.Graphics.Clear(Color.White);
         }
 
         private void SetupBrushSizeMenu()
         {
-            trackBar.Minimum = 1;
-            trackBar.Maximum = 30;
-            trackBar.Value = penWidth;
-            trackBar.Width = 150;
+            CursorSizeAdjust.Minimum = 1;
+            CursorSizeAdjust.Maximum = 30;
+            CursorSizeAdjust.Value = penWidth;
+            CursorSizeAdjust.Width = 150;
 
-            trackBar.Scroll += (s, e) =>
+            CursorSizeAdjust.Scroll += (s, e) =>
             {
-                penWidth = trackBar.Value;
+                penWidth = CursorSizeAdjust.Value;
                 UpdateCursor();
             };
 
-            Controls.Add(trackBar);
-
-
+            Controls.Add(CursorSizeAdjust);
         }
 
         private void UpdateCursor()
@@ -56,18 +70,15 @@ namespace FinalProject
                     g.FillEllipse(brush, 0, 0, size - 1, size - 1);
                 }
 
-   
                 using (Pen pen = new Pen(Color.Black, 1))
                 {
                     g.DrawEllipse(pen, 0, 0, size - 1, size - 1);
                 }
             }
 
-            // Set custom cursor
             Cursor customCursor = new Cursor(bmp.GetHicon());
-            pictureBox1.Cursor = customCursor;
+            DrawingArea.Cursor = customCursor;
         }
-
 
         private void LoadColorPalette()
         {
@@ -95,16 +106,15 @@ namespace FinalProject
                 colorBtn.MouseEnter += ColorBtn_MouseEnter;
                 colorBtn.MouseLeave += ColorBtn_MouseLeave;
 
-                panelColors.Controls.Add(colorBtn);
+                ColorsPanel.Controls.Add(colorBtn);
 
                 if (i == colors.Length - 1)
                 {
-                    customcoButton = colorBtn;
-                    customcoButton.Click += customcoButton_Click;
+                    customColorButton = colorBtn;
+                    customColorButton.Click += customColorButton_Click;
                 }
             }
         }
-
 
         private void ColorBtn_MouseEnter(object sender, EventArgs e)
         {
@@ -116,18 +126,17 @@ namespace FinalProject
             Cursor = Cursors.Default;
         }
 
-        private void customcoButton_Click(object sender, EventArgs e)
+        private void customColorButton_Click(object sender, EventArgs e)
         {
             ColorDialog colorDialog = new ColorDialog();
             if (colorDialog.ShowDialog() == DialogResult.OK)
             {
-                customcoButton.BackColor = colorDialog.Color;
-                customcoButton.Tag = colorDialog.Color;
+                customColorButton.BackColor = colorDialog.Color;
+                customColorButton.Tag = colorDialog.Color;
                 selectedColor = colorDialog.Color;
                 UpdateCursor();
             }
         }
-
 
         private void ColorBtn_Click(object sender, EventArgs e)
         {
@@ -135,6 +144,65 @@ namespace FinalProject
             selectedColor = (Color)clickedButton.Tag;
             UpdateCursor();
         }
-        
+
+        private void DrawingArea_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left) return;
+
+            isDrawing = true;
+            previousPoint = e.Location;
+
+            // Draw the initial point
+            using (Brush brush = new SolidBrush(selectedColor))
+            {
+                bufferedGraphics.Graphics.FillEllipse(brush,
+                    e.X - penWidth / 2, e.Y - penWidth / 2, penWidth, penWidth);
+            }
+            bufferedGraphics.Render(DrawingArea.CreateGraphics());
+        }
+
+        private void DrawingArea_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!isDrawing || e.Button != MouseButtons.Left) return;
+
+            // Draw a line between the previous point and current point to fill gaps
+            using (Pen pen = new Pen(selectedColor, penWidth))
+            {
+                pen.StartCap = LineCap.Round;
+                pen.EndCap = LineCap.Round;
+                bufferedGraphics.Graphics.DrawLine(pen, previousPoint, e.Location);
+            }
+
+            // Also draw a circle at the current position for better coverage
+            using (Brush brush = new SolidBrush(selectedColor))
+            {
+                bufferedGraphics.Graphics.FillEllipse(brush,
+                    e.X - penWidth / 2, e.Y - penWidth / 2, penWidth, penWidth);
+            }
+
+            bufferedGraphics.Render(DrawingArea.CreateGraphics());
+            previousPoint = e.Location;
+        }
+
+        private void DrawingArea_MouseUp(object sender, MouseEventArgs e)
+        {
+            isDrawing = false;
+        }
+
+        private void DrawingArea_Paint(object sender, PaintEventArgs e)
+        {
+            bufferedGraphics.Render(e.Graphics);
+        }
+
+        private void DrawingArea_Resize(object sender, EventArgs e)
+        {
+            // Reinitialize the buffer when the drawing area is resized
+            if (bufferedGraphics != null)
+            {
+                bufferedGraphics.Dispose();
+                InitializeBufferedGraphics();
+                bufferedGraphics.Render(DrawingArea.CreateGraphics());
+            }
+        }
     }
 }

@@ -30,64 +30,73 @@ namespace FinalProject
         /// </summary>
         private void InitializeComponent()
         {
-            this.panelColors = new System.Windows.Forms.Panel();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.trackBar = new System.Windows.Forms.TrackBar();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBar)).BeginInit();
+            this.ColorsPanel = new System.Windows.Forms.Panel();
+            this.DrawingArea = new System.Windows.Forms.PictureBox();
+            this.CursorSizeAdjust = new System.Windows.Forms.TrackBar();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            ((System.ComponentModel.ISupportInitialize)(this.DrawingArea)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.CursorSizeAdjust)).BeginInit();
             this.SuspendLayout();
             // 
-            // panelColors
+            // ColorsPanel
             // 
-            this.panelColors.Location = new System.Drawing.Point(56, 39);
-            this.panelColors.Name = "panelColors";
-            this.panelColors.Size = new System.Drawing.Size(596, 100);
-            this.panelColors.TabIndex = 0;
+            this.ColorsPanel.Location = new System.Drawing.Point(15, 15);
+            this.ColorsPanel.Margin = new System.Windows.Forms.Padding(2);
+            this.ColorsPanel.Name = "ColorsPanel";
+            this.ColorsPanel.Size = new System.Drawing.Size(447, 81);
+            this.ColorsPanel.TabIndex = 0;
             // 
-            // pictureBox1
+            // DrawingArea
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(0, 154);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(1580, 722);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-            this.pictureBox1.TabIndex = 1;
-            this.pictureBox1.TabStop = false;
+            this.DrawingArea.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.DrawingArea.Location = new System.Drawing.Point(-3, 125);
+            this.DrawingArea.Margin = new System.Windows.Forms.Padding(2);
+            this.DrawingArea.Name = "DrawingArea";
+            this.DrawingArea.Size = new System.Drawing.Size(1159, 587);
+            this.DrawingArea.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.DrawingArea.TabIndex = 1;
+            this.DrawingArea.TabStop = false;
+            this.DrawingArea.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawingArea_Paint);
+            this.DrawingArea.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DrawingArea_MouseDown);
+            this.DrawingArea.MouseMove += new System.Windows.Forms.MouseEventHandler(this.DrawingArea_MouseMove);
+            this.DrawingArea.MouseUp += new System.Windows.Forms.MouseEventHandler(this.DrawingArea_MouseUp);
             // 
-            // trackBar
+            // CursorSizeAdjust
             // 
-            this.trackBar.AutoSize = false;
-            this.trackBar.CausesValidation = false;
-            this.trackBar.Location = new System.Drawing.Point(751, 71);
-            this.trackBar.Name = "trackBar";
-            this.trackBar.Size = new System.Drawing.Size(249, 56);
-            this.trackBar.TabIndex = 2;
-            this.trackBar.TickStyle = System.Windows.Forms.TickStyle.None;
+            this.CursorSizeAdjust.AutoSize = false;
+            this.CursorSizeAdjust.CausesValidation = false;
+            this.CursorSizeAdjust.Location = new System.Drawing.Point(17, 104);
+            this.CursorSizeAdjust.Margin = new System.Windows.Forms.Padding(2);
+            this.CursorSizeAdjust.Name = "CursorSizeAdjust";
+            this.CursorSizeAdjust.Size = new System.Drawing.Size(187, 17);
+            this.CursorSizeAdjust.TabIndex = 2;
+            this.CursorSizeAdjust.TickStyle = System.Windows.Forms.TickStyle.None;
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.ClientSize = new System.Drawing.Size(1580, 876);
-            this.Controls.Add(this.trackBar);
-            this.Controls.Add(this.pictureBox1);
-            this.Controls.Add(this.panelColors);
+            this.ClientSize = new System.Drawing.Size(1155, 712);
+            this.Controls.Add(this.CursorSizeAdjust);
+            this.Controls.Add(this.DrawingArea);
+            this.Controls.Add(this.ColorsPanel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Advanced Paint";
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBar)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.DrawingArea)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.CursorSizeAdjust)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Panel panelColors;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private TrackBar trackBar;
+        private System.Windows.Forms.Panel ColorsPanel;
+        private System.Windows.Forms.PictureBox DrawingArea;
+        private TrackBar CursorSizeAdjust;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
 }
 
