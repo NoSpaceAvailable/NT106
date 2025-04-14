@@ -25,17 +25,17 @@ namespace FinalProject
         private bool isDrawing = false;
         private string selectedButton = null;
         private RemoteColorEditor remotecoloreditor;
-        public int DOWN = 0;
-        public int MOVE = 1;
-        public int UP = 2;
+        public const int DOWN = 1;
+        public const int MOVE = 2;
+        public const int UP = 3;
         public class Draw_data
         {
-            public int Event;
-            public int penWid;
-            public int X;
-            public int Y;
-            public PointData prevPoint;
-            public PointData Location;
+            public int Event { get; set; }
+            public int penWid { get; set; }
+            public int X { get; set; }
+            public int Y { get; set; }
+            public PointData prevPoint { get; set; }
+            public PointData Location { get; set; }
         }
 
         public class PointData
@@ -211,7 +211,10 @@ namespace FinalProject
 
         private void FlushBuf()
         {
-            MessageBox.Show(current_ptr.ToString());
+            if(remotecoloreditor == null || !remotecoloreditor.Visible)
+            {
+                return;
+            }
             remotecoloreditor.SendBuf(buffer, current_ptr);
             for (int i = 0; i < _size; i++)
                 buffer[i] = null;
@@ -288,9 +291,49 @@ namespace FinalProject
 
         public void DrawFromNetwork(Draw_data[] datas)
         {
+            Point prevPoint = new Point(0, 0);
+            MessageBox.Show("Drawing");
             foreach(Draw_data x in datas)
             {
-                continue;
+                switch(x.Event)
+                {
+                    case DOWN:
+                        MessageBox.Show("It down");
+                        prevPoint = x.Location.ToPoint();
+
+                        // Draw the initial point
+                        using (Brush brush = new SolidBrush(Color.Red))
+                        {
+                            bufferedGraphics.Graphics.FillEllipse(brush,
+                                x.X - penWidth / 2, x.Y - penWidth / 2, penWidth, penWidth);
+                        }
+                        bufferedGraphics.Render(DrawingArea.CreateGraphics());
+                        break;
+                    case MOVE:
+                        MessageBox.Show("It move");
+                        using (Pen pen = new Pen(Color.Red, penWidth))
+                        {
+                            pen.StartCap = LineCap.Round;
+                            pen.EndCap = LineCap.Round;
+                            bufferedGraphics.Graphics.DrawLine(pen, prevPoint, x.Location.ToPoint());
+                        }
+
+                        // Also draw a circle at the current position for better coverage
+                        using (Brush brush = new SolidBrush(Color.Red))
+                        {
+                            bufferedGraphics.Graphics.FillEllipse(brush,
+                                x.X - penWidth / 2, x.Y - penWidth / 2, penWidth, penWidth);
+                        }
+                        bufferedGraphics.Render(DrawingArea.CreateGraphics());
+                        prevPoint = x.Location.ToPoint();
+                        break;
+                    case UP:
+                        MessageBox.Show("It up");
+                        break;
+                    default:
+                        MessageBox.Show("What???");
+                        break;
+                }
             }
         }
 

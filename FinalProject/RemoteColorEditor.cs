@@ -32,8 +32,8 @@ namespace FinalProject
             mainForm = form;
         }
 
-        private TcpClient client;
-        private TcpListener listener;
+        private TcpClient client = null;
+        private TcpListener listener = null;
         private List<TcpClient> clients = new List<TcpClient>();
         private void ConnectToServer(string ipAddress, int port)
         {
@@ -101,6 +101,7 @@ namespace FinalProject
                 {
                     TcpClient newClient = listener.AcceptTcpClient();
                     clients.Add(newClient);
+                    MessageBox.Show("Connected");
                     Task.Run(() => ClientHandler(newClient));
                 }
             }
@@ -117,6 +118,7 @@ namespace FinalProject
                 while (true) 
                 {
                     Draw_data[] received = ReceiveBuf(_client);
+                    MessageBox.Show(received[0].ToString());
                     mainForm.DrawFromNetwork(received);
                 }    
             }
@@ -151,8 +153,7 @@ namespace FinalProject
             {
                 TcpClient tcp = client;
                 NetworkStream stream = tcp.GetStream();
-
-                string json = JsonSerializer.Serialize(datas.Take(len).ToArray());
+                string json = JsonSerializer.Serialize(datas.Take(len));
 
                 byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
 
@@ -161,6 +162,8 @@ namespace FinalProject
                 stream.Write(jsonBytes, 0, jsonBytes.Length);
                 return;
             }
+            MessageBox.Show("Scoobedo");
+            return;
         }
 
         public Draw_data[] ReceiveBuf(TcpClient tcp)
@@ -172,6 +175,7 @@ namespace FinalProject
             int length = BitConverter.ToInt32(lengthPrefix, 0);
 
             byte[] buffer = new byte[length];
+            MessageBox.Show(length.ToString());
             int read = 0;
             while (read < length)
                 read += stream.Read(buffer, read, length - read);
