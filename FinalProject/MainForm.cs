@@ -37,6 +37,19 @@ namespace FinalProject
             public PointData prevPoint { get; set; }
             public PointData Location { get; set; }
         }
+        public class DrawPacket
+        {
+            public Draw_data[] Data { get; set; }
+            public ColorData Color { get; set; }
+
+            public DrawPacket() { }
+
+            public DrawPacket(Draw_data[] data, Color color)
+            {
+                Data = data;
+                Color = new ColorData(color);
+            }
+        }
 
         public class PointData
         {
@@ -53,6 +66,27 @@ namespace FinalProject
 
             public Point ToPoint() => new Point(X, Y);
         }
+
+        public class ColorData
+        {
+            public byte R { get; set; }
+            public byte G { get; set; }
+            public byte B { get; set; }
+            public byte A { get; set; }
+
+            public ColorData() { }
+
+            public ColorData(Color color)
+            {
+                R = color.R;
+                G = color.G;
+                B = color.B;
+                A = color.A;
+            }
+
+            public Color ToColor() => Color.FromArgb(A, R, G, B);
+        }
+
         private const long _size = 4096 * 4096;
         private Draw_data[] buffer = new Draw_data[_size];
         private int current_ptr = 0;
@@ -215,7 +249,7 @@ namespace FinalProject
             {
                 return;
             }
-            remotecoloreditor.SendBuf(buffer, current_ptr);
+            remotecoloreditor.SendBuf(buffer, current_ptr, selectedColor);
             for (int i = 0; i < _size; i++)
                 buffer[i] = null;
             current_ptr = 0;
@@ -234,7 +268,7 @@ namespace FinalProject
             };
             if (current_ptr == _size)
             {
-                Task.Run(()=> FlushBuf());
+                FlushBuf();
             }
         }
 
@@ -281,7 +315,7 @@ namespace FinalProject
         private void DrawingArea_MouseUp(object sender, MouseEventArgs e)
         {
             isDrawing = false;
-            Task.Run(() => FlushBuf());
+            FlushBuf();
         }
 
         private void DrawingArea_Paint(object sender, PaintEventArgs e)
@@ -289,7 +323,7 @@ namespace FinalProject
             bufferedGraphics.Render(e.Graphics);
         }
 
-        public void DrawFromNetwork(Draw_data[] datas)
+        public void DrawFromNetwork(Draw_data[] datas, Color crt_color)
         {
             Point prevPoint = new Point(0, 0);
             foreach (Draw_data x in datas)
@@ -300,7 +334,7 @@ namespace FinalProject
                         prevPoint = x.Location.ToPoint();
 
                         // Draw the initial point
-                        using (Brush brush = new SolidBrush(selectedColor))
+                        using (Brush brush = new SolidBrush(crt_color))
                         {
                             bufferedGraphics.Graphics.FillEllipse(brush,
                                 x.X - x.penWid / 2, x.Y - x.penWid / 2, x.penWid, x.penWid);
@@ -308,7 +342,7 @@ namespace FinalProject
                         bufferedGraphics.Render(DrawingArea.CreateGraphics());
                         break;
                     case MOVE:
-                        using (Pen pen = new Pen(selectedColor, x.penWid))
+                        using (Pen pen = new Pen(crt_color, x.penWid))
                         {
                             pen.StartCap = LineCap.Round;
                             pen.EndCap = LineCap.Round;
@@ -316,7 +350,7 @@ namespace FinalProject
                         }
 
                         // Also draw a circle at the current position for better coverage
-                        using (Brush brush = new SolidBrush(selectedColor))
+                        using (Brush brush = new SolidBrush(crt_color))
                         {
                             bufferedGraphics.Graphics.FillEllipse(brush,
                                 x.X - x.penWid / 2, x.Y - x.penWid / 2, x.penWid, x.penWid);

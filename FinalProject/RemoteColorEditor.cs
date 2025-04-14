@@ -67,8 +67,8 @@ namespace FinalProject
             {
                 while (true)
                 {
-                    Draw_data[] received = ReceiveBuf(client);
-                    mainForm.DrawFromNetwork(received);
+                    DrawPacket received = ReceiveBuf(client);
+                    mainForm.DrawFromNetwork(received.Data, received.Color.ToColor());
                 }
             }
             catch
@@ -127,8 +127,8 @@ namespace FinalProject
             {
                 while (true) 
                 {
-                    Draw_data[] received = ReceiveBuf(_client);
-                    mainForm.DrawFromNetwork(received);
+                    DrawPacket received = ReceiveBuf(_client);
+                    mainForm.DrawFromNetwork(received.Data, received.Color.ToColor());
                 }    
             }
             catch
@@ -137,7 +137,7 @@ namespace FinalProject
             }
         }
 
-        public void SendBuf(Draw_data[] datas, int len)
+        public void SendBuf(Draw_data[] datas, int len, Color crt_color)
         {
             if (client == null && listener == null)
                 return;
@@ -148,7 +148,8 @@ namespace FinalProject
                     TcpClient tcp = clients[i];
                     NetworkStream stream = tcp.GetStream();
 
-                    string json = JsonSerializer.Serialize(datas.Take(len).ToArray());
+                    var packet = new DrawPacket(datas.Take(len).ToArray(), crt_color);
+                    string json = JsonSerializer.Serialize(packet);
 
                     byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
 
@@ -162,7 +163,8 @@ namespace FinalProject
             {
                 TcpClient tcp = client;
                 NetworkStream stream = tcp.GetStream();
-                string json = JsonSerializer.Serialize(datas.Take(len));
+                var packet = new DrawPacket(datas.Take(len).ToArray(), crt_color);
+                string json = JsonSerializer.Serialize(packet);
 
                 byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
 
@@ -174,7 +176,7 @@ namespace FinalProject
             return;
         }
 
-        public Draw_data[] ReceiveBuf(TcpClient tcp)
+        public DrawPacket ReceiveBuf(TcpClient tcp)
         {
             NetworkStream stream = tcp.GetStream();
 
@@ -183,13 +185,12 @@ namespace FinalProject
             int length = BitConverter.ToInt32(lengthPrefix, 0);
 
             byte[] buffer = new byte[length];
-            //MessageBox.Show(length.ToString());
             int read = 0;
             while (read < length)
                 read += stream.Read(buffer, read, length - read);
 
-            string json = System.Text.Encoding.UTF8.GetString(buffer);
-            return JsonSerializer.Deserialize<Draw_data[]>(json);
+            string json = Encoding.UTF8.GetString(buffer);
+            return JsonSerializer.Deserialize<DrawPacket>(json);
         }
 
         private void ConnectBtn_Click(object sender, EventArgs e)
