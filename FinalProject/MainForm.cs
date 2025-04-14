@@ -211,7 +211,7 @@ namespace FinalProject
 
         private void FlushBuf()
         {
-            if(remotecoloreditor == null || !remotecoloreditor.Visible)
+            if (remotecoloreditor == null || !remotecoloreditor.Visible)
             {
                 return;
             }
@@ -254,7 +254,7 @@ namespace FinalProject
             bufferedGraphics.Render(DrawingArea.CreateGraphics());
             SyncWithRemote(e, DOWN);
         }
-        
+
         private void DrawingArea_MouseMove(object sender, MouseEventArgs e)
         {
             if (!isDrawing || e.Button != MouseButtons.Left) return;
@@ -292,13 +292,11 @@ namespace FinalProject
         public void DrawFromNetwork(Draw_data[] datas)
         {
             Point prevPoint = new Point(0, 0);
-            MessageBox.Show("Drawing");
-            foreach(Draw_data x in datas)
+            foreach (Draw_data x in datas)
             {
-                switch(x.Event)
+                switch (x.Event)
                 {
                     case DOWN:
-                        MessageBox.Show("It down");
                         prevPoint = x.Location.ToPoint();
 
                         // Draw the initial point
@@ -310,7 +308,6 @@ namespace FinalProject
                         bufferedGraphics.Render(DrawingArea.CreateGraphics());
                         break;
                     case MOVE:
-                        MessageBox.Show("It move");
                         using (Pen pen = new Pen(Color.Red, penWidth))
                         {
                             pen.StartCap = LineCap.Round;
@@ -328,10 +325,8 @@ namespace FinalProject
                         prevPoint = x.Location.ToPoint();
                         break;
                     case UP:
-                        MessageBox.Show("It up");
                         break;
                     default:
-                        MessageBox.Show("What???");
                         break;
                 }
             }

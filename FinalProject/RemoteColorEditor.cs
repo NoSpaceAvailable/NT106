@@ -118,7 +118,6 @@ namespace FinalProject
                 while (true) 
                 {
                     Draw_data[] received = ReceiveBuf(_client);
-                    MessageBox.Show(received[0].ToString());
                     mainForm.DrawFromNetwork(received);
                 }    
             }
@@ -175,7 +174,7 @@ namespace FinalProject
             int length = BitConverter.ToInt32(lengthPrefix, 0);
 
             byte[] buffer = new byte[length];
-            MessageBox.Show(length.ToString());
+            //MessageBox.Show(length.ToString());
             int read = 0;
             while (read < length)
                 read += stream.Read(buffer, read, length - read);
