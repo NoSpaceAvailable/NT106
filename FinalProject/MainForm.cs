@@ -4,10 +4,13 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static FinalProject.RemoteColorEditor;
 
 namespace FinalProject
 {
@@ -21,6 +24,38 @@ namespace FinalProject
         private Point previousPoint;
         private bool isDrawing = false;
         private string selectedButton = null;
+        private RemoteColorEditor remotecoloreditor;
+        public int DOWN = 0;
+        public int MOVE = 1;
+        public int UP = 2;
+        public class Draw_data
+        {
+            public int Event;
+            public int penWid;
+            public int X;
+            public int Y;
+            public PointData prevPoint;
+            public PointData Location;
+        }
+
+        public class PointData
+        {
+            public int X { get; set; }
+            public int Y { get; set; }
+
+            public PointData() { }
+
+            public PointData(Point p)
+            {
+                X = p.X;
+                Y = p.Y;
+            }
+
+            public Point ToPoint() => new Point(X, Y);
+        }
+        private const long _size = 4096 * 4096;
+        private Draw_data[] buffer = new Draw_data[_size];
+        private int current_ptr = 0;
 
         public MainForm()
         {
@@ -174,6 +209,32 @@ namespace FinalProject
             UpdateCursor();
         }
 
+        private void FlushBuf()
+        {
+            MessageBox.Show(current_ptr.ToString());
+            remotecoloreditor.SendBuf(buffer, current_ptr);
+            for (int i = 0; i < _size; i++)
+                buffer[i] = null;
+            current_ptr = 0;
+        }
+
+        private void SyncWithRemote(MouseEventArgs e, int evnt)
+        {
+            buffer[current_ptr++] = new Draw_data
+            {
+                Event = evnt,
+                prevPoint = new PointData(previousPoint),
+                penWid = penWidth,
+                X = e.X,
+                Y = e.Y,
+                Location = new PointData(e.Location)
+            };
+            if (current_ptr == _size)
+            {
+                FlushBuf();
+            }
+        }
+
         private void DrawingArea_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left) return;
@@ -188,8 +249,9 @@ namespace FinalProject
                     e.X - penWidth / 2, e.Y - penWidth / 2, penWidth, penWidth);
             }
             bufferedGraphics.Render(DrawingArea.CreateGraphics());
+            SyncWithRemote(e, DOWN);
         }
-
+        
         private void DrawingArea_MouseMove(object sender, MouseEventArgs e)
         {
             if (!isDrawing || e.Button != MouseButtons.Left) return;
@@ -208,19 +270,28 @@ namespace FinalProject
                 bufferedGraphics.Graphics.FillEllipse(brush,
                     e.X - penWidth / 2, e.Y - penWidth / 2, penWidth, penWidth);
             }
-
             bufferedGraphics.Render(DrawingArea.CreateGraphics());
+            SyncWithRemote(e, MOVE);
             previousPoint = e.Location;
         }
 
         private void DrawingArea_MouseUp(object sender, MouseEventArgs e)
         {
             isDrawing = false;
+            FlushBuf();
         }
 
         private void DrawingArea_Paint(object sender, PaintEventArgs e)
         {
             bufferedGraphics.Render(e.Graphics);
+        }
+
+        public void DrawFromNetwork(Draw_data[] datas)
+        {
+            foreach(Draw_data x in datas)
+            {
+                continue;
+            }
         }
 
         private void DrawingArea_Resize(object sender, EventArgs e)
@@ -236,8 +307,8 @@ namespace FinalProject
 
         private void button1_Click(object sender, EventArgs e)
         {
-            RemoteColorEditor remoteColorEditor = new RemoteColorEditor();
-            remoteColorEditor.Show();
+            remotecoloreditor = new RemoteColorEditor(this);
+            remotecoloreditor.Show();
         }
     }
 }
