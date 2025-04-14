@@ -234,7 +234,7 @@ namespace FinalProject
             };
             if (current_ptr == _size)
             {
-                FlushBuf();
+                Task.Run(()=> FlushBuf());
             }
         }
 
@@ -281,7 +281,7 @@ namespace FinalProject
         private void DrawingArea_MouseUp(object sender, MouseEventArgs e)
         {
             isDrawing = false;
-            FlushBuf();
+            Task.Run(() => FlushBuf());
         }
 
         private void DrawingArea_Paint(object sender, PaintEventArgs e)
@@ -300,15 +300,15 @@ namespace FinalProject
                         prevPoint = x.Location.ToPoint();
 
                         // Draw the initial point
-                        using (Brush brush = new SolidBrush(Color.Red))
+                        using (Brush brush = new SolidBrush(selectedColor))
                         {
                             bufferedGraphics.Graphics.FillEllipse(brush,
-                                x.X - penWidth / 2, x.Y - penWidth / 2, penWidth, penWidth);
+                                x.X - x.penWid / 2, x.Y - x.penWid / 2, x.penWid, x.penWid);
                         }
                         bufferedGraphics.Render(DrawingArea.CreateGraphics());
                         break;
                     case MOVE:
-                        using (Pen pen = new Pen(Color.Red, penWidth))
+                        using (Pen pen = new Pen(selectedColor, x.penWid))
                         {
                             pen.StartCap = LineCap.Round;
                             pen.EndCap = LineCap.Round;
@@ -316,10 +316,10 @@ namespace FinalProject
                         }
 
                         // Also draw a circle at the current position for better coverage
-                        using (Brush brush = new SolidBrush(Color.Red))
+                        using (Brush brush = new SolidBrush(selectedColor))
                         {
                             bufferedGraphics.Graphics.FillEllipse(brush,
-                                x.X - penWidth / 2, x.Y - penWidth / 2, penWidth, penWidth);
+                                x.X - x.penWid / 2, x.Y - x.penWid / 2, x.penWid, x.penWid);
                         }
                         bufferedGraphics.Render(DrawingArea.CreateGraphics());
                         prevPoint = x.Location.ToPoint();

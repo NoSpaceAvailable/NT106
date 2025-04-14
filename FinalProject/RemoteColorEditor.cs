@@ -63,7 +63,18 @@ namespace FinalProject
 
         private void Client()
         {
+            try
+            {
+                while (true)
+                {
+                    Draw_data[] received = ReceiveBuf(client);
+                    mainForm.DrawFromNetwork(received);
+                }
+            }
+            catch
+            {
 
+            }
         }
 
         private void HostServer(string ipAddress, int port)
@@ -101,7 +112,6 @@ namespace FinalProject
                 {
                     TcpClient newClient = listener.AcceptTcpClient();
                     clients.Add(newClient);
-                    MessageBox.Show("Connected");
                     Task.Run(() => ClientHandler(newClient));
                 }
             }
@@ -161,7 +171,6 @@ namespace FinalProject
                 stream.Write(jsonBytes, 0, jsonBytes.Length);
                 return;
             }
-            MessageBox.Show("Scoobedo");
             return;
         }
 
