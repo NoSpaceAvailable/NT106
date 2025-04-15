@@ -68,12 +68,16 @@ namespace FinalProject
                 while (true)
                 {
                     DrawPacket received = ReceiveBuf(client);
+                    if (received == null)
+                        break;
                     mainForm.DrawFromNetwork(received.Data, received.Color.ToColor());
                 }
             }
             catch
             {
-
+                if (client != null)
+                    client.Close();
+                client = null;
             }
         }
 
@@ -110,9 +114,8 @@ namespace FinalProject
             {
                 while (true)
                 {
-                    TcpClient newClient = listener.AcceptTcpClient();
-                    clients.Add(newClient);
-                    Task.Run(() => ClientHandler(newClient));
+                    clients.Add(listener.AcceptTcpClient());
+                    Task.Run(() => ClientHandler(clients[clients.Count() - 1]));
                 }
             }
             catch
@@ -128,12 +131,15 @@ namespace FinalProject
                 while (true) 
                 {
                     DrawPacket received = ReceiveBuf(_client);
+                    if (received == null)
+                        break;
                     mainForm.DrawFromNetwork(received.Data, received.Color.ToColor());
                 }    
             }
             catch
             {
                 _client.Close();
+                clients.Remove(_client);
             }
         }
 
@@ -183,7 +189,8 @@ namespace FinalProject
                 }
                 catch
                 {
-
+                    client.Close();
+                    client = null;
                 }
                 return;
             }
@@ -210,6 +217,7 @@ namespace FinalProject
             }
             catch
             {
+                tcp.Close();
                 return null;
             }
         }
