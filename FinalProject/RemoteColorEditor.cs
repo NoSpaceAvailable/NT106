@@ -133,7 +133,7 @@ namespace FinalProject
             }
             catch
             {
-
+                _client.Close();
             }
         }
 
@@ -161,7 +161,7 @@ namespace FinalProject
                     }
                     catch
                     {
-
+                        clients.Remove(clients[i]);
                     }
                 }
                 return;

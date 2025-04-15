@@ -25,6 +25,7 @@ namespace FinalProject
         private bool isDrawing = false;
         private string selectedButton = null;
         private RemoteColorEditor remotecoloreditor;
+        private static readonly object lockObj = new object();
         public const int DOWN = 1;
         public const int MOVE = 2;
         public const int UP = 3;
@@ -107,8 +108,8 @@ namespace FinalProject
             context.MaximumBuffer = new Size(DrawingArea.Width + 1, DrawingArea.Height + 1);
             bufferedGraphics = context.Allocate(DrawingArea.CreateGraphics(),
                 new Rectangle(0, 0, DrawingArea.Width, DrawingArea.Height));
-            bufferedGraphics.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            bufferedGraphics.Graphics.Clear(Color.White);
+            lock (lockObj) bufferedGraphics.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            lock (lockObj) bufferedGraphics.Graphics.Clear(Color.White);
         }
 
         private void SetupBrushSizeMenu()
@@ -282,10 +283,10 @@ namespace FinalProject
             // Draw the initial point
             using (Brush brush = new SolidBrush(selectedColor))
             {
-                bufferedGraphics.Graphics.FillEllipse(brush,
+                lock (lockObj) bufferedGraphics.Graphics.FillEllipse(brush,
                     e.X - penWidth / 2, e.Y - penWidth / 2, penWidth, penWidth);
             }
-            bufferedGraphics.Render(DrawingArea.CreateGraphics());
+            lock (lockObj) bufferedGraphics.Render(DrawingArea.CreateGraphics());
             SyncWithRemote(e, DOWN);
         }
 
@@ -298,16 +299,16 @@ namespace FinalProject
             {
                 pen.StartCap = LineCap.Round;
                 pen.EndCap = LineCap.Round;
-                bufferedGraphics.Graphics.DrawLine(pen, previousPoint, e.Location);
+                lock (lockObj) bufferedGraphics.Graphics.DrawLine(pen, previousPoint, e.Location);
             }
 
             // Also draw a circle at the current position for better coverage
             using (Brush brush = new SolidBrush(selectedColor))
             {
-                bufferedGraphics.Graphics.FillEllipse(brush,
+                lock (lockObj) bufferedGraphics.Graphics.FillEllipse(brush,
                     e.X - penWidth / 2, e.Y - penWidth / 2, penWidth, penWidth);
             }
-            bufferedGraphics.Render(DrawingArea.CreateGraphics());
+            lock (lockObj) bufferedGraphics.Render(DrawingArea.CreateGraphics());
             SyncWithRemote(e, MOVE);
             previousPoint = e.Location;
         }
@@ -320,7 +321,7 @@ namespace FinalProject
 
         private void DrawingArea_Paint(object sender, PaintEventArgs e)
         {
-            bufferedGraphics.Render(e.Graphics);
+            lock (lockObj) bufferedGraphics.Render(e.Graphics);
         }
 
         public void DrawFromNetwork(Draw_data[] datas, Color crt_color)
@@ -336,26 +337,26 @@ namespace FinalProject
                         // Draw the initial point
                         using (Brush brush = new SolidBrush(crt_color))
                         {
-                            bufferedGraphics.Graphics.FillEllipse(brush,
+                            lock (lockObj) bufferedGraphics.Graphics.FillEllipse(brush,
                                 x.X - x.penWid / 2, x.Y - x.penWid / 2, x.penWid, x.penWid);
                         }
-                        bufferedGraphics.Render(DrawingArea.CreateGraphics());
+                        lock (lockObj) bufferedGraphics.Render(DrawingArea.CreateGraphics());
                         break;
                     case MOVE:
                         using (Pen pen = new Pen(crt_color, x.penWid))
                         {
                             pen.StartCap = LineCap.Round;
                             pen.EndCap = LineCap.Round;
-                            bufferedGraphics.Graphics.DrawLine(pen, prevPoint, x.Location.ToPoint());
+                            lock (lockObj) bufferedGraphics.Graphics.DrawLine(pen, prevPoint, x.Location.ToPoint());
                         }
 
                         // Also draw a circle at the current position for better coverage
                         using (Brush brush = new SolidBrush(crt_color))
                         {
-                            bufferedGraphics.Graphics.FillEllipse(brush,
+                            lock (lockObj) bufferedGraphics.Graphics.FillEllipse(brush,
                                 x.X - x.penWid / 2, x.Y - x.penWid / 2, x.penWid, x.penWid);
                         }
-                        bufferedGraphics.Render(DrawingArea.CreateGraphics());
+                        lock (lockObj) bufferedGraphics.Render(DrawingArea.CreateGraphics());
                         prevPoint = x.Location.ToPoint();
                         break;
                     case UP:
@@ -371,9 +372,9 @@ namespace FinalProject
             // Reinitialize the buffer when the drawing area is resized
             if (bufferedGraphics != null)
             {
-                bufferedGraphics.Dispose();
+                lock (lockObj) bufferedGraphics.Dispose();
                 InitializeBufferedGraphics();
-                bufferedGraphics.Render(DrawingArea.CreateGraphics());
+                lock (lockObj) bufferedGraphics.Render(DrawingArea.CreateGraphics());
             }
         }
 
