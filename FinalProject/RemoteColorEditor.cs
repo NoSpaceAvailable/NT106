@@ -145,9 +145,33 @@ namespace FinalProject
             {
                 for (int i = 0; i < clients.Count; i++)
                 {
-                    TcpClient tcp = clients[i];
-                    NetworkStream stream = tcp.GetStream();
+                    try
+                    {
+                        TcpClient tcp = clients[i];
+                        NetworkStream stream = tcp.GetStream();
 
+                        var packet = new DrawPacket(datas.Take(len).ToArray(), crt_color);
+                        string json = JsonSerializer.Serialize(packet);
+
+                        byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
+
+                        byte[] lengthPrefix = BitConverter.GetBytes(jsonBytes.Length);
+                        stream.Write(lengthPrefix, 0, lengthPrefix.Length);
+                        stream.Write(jsonBytes, 0, jsonBytes.Length);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+                return;
+            }
+            else if (client != null)
+            {
+                try
+                {
+                    TcpClient tcp = client;
+                    NetworkStream stream = tcp.GetStream();
                     var packet = new DrawPacket(datas.Take(len).ToArray(), crt_color);
                     string json = JsonSerializer.Serialize(packet);
 
@@ -157,20 +181,10 @@ namespace FinalProject
                     stream.Write(lengthPrefix, 0, lengthPrefix.Length);
                     stream.Write(jsonBytes, 0, jsonBytes.Length);
                 }
-                return;
-            }
-            else if (client != null)
-            {
-                TcpClient tcp = client;
-                NetworkStream stream = tcp.GetStream();
-                var packet = new DrawPacket(datas.Take(len).ToArray(), crt_color);
-                string json = JsonSerializer.Serialize(packet);
+                catch
+                {
 
-                byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
-
-                byte[] lengthPrefix = BitConverter.GetBytes(jsonBytes.Length);
-                stream.Write(lengthPrefix, 0, lengthPrefix.Length);
-                stream.Write(jsonBytes, 0, jsonBytes.Length);
+                }
                 return;
             }
             return;
@@ -178,19 +192,26 @@ namespace FinalProject
 
         public DrawPacket ReceiveBuf(TcpClient tcp)
         {
-            NetworkStream stream = tcp.GetStream();
+            try
+            {
+                NetworkStream stream = tcp.GetStream();
 
-            byte[] lengthPrefix = new byte[4];
-            stream.Read(lengthPrefix, 0, 4);
-            int length = BitConverter.ToInt32(lengthPrefix, 0);
+                byte[] lengthPrefix = new byte[4];
+                stream.Read(lengthPrefix, 0, 4);
+                int length = BitConverter.ToInt32(lengthPrefix, 0);
 
-            byte[] buffer = new byte[length];
-            int read = 0;
-            while (read < length)
-                read += stream.Read(buffer, read, length - read);
+                byte[] buffer = new byte[length];
+                int read = 0;
+                while (read < length)
+                    read += stream.Read(buffer, read, length - read);
 
-            string json = Encoding.UTF8.GetString(buffer);
-            return JsonSerializer.Deserialize<DrawPacket>(json);
+                string json = Encoding.UTF8.GetString(buffer);
+                return JsonSerializer.Deserialize<DrawPacket>(json);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private void ConnectBtn_Click(object sender, EventArgs e)
