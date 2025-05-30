@@ -34,14 +34,13 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.DisconnectBtn = new System.Windows.Forms.Button();
-            this.HostBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // IPTextBox
             // 
             this.IPTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.IPTextBox.Location = new System.Drawing.Point(116, 22);
-            this.IPTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.IPTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.IPTextBox.MaxLength = 15;
             this.IPTextBox.Multiline = true;
             this.IPTextBox.Name = "IPTextBox";
@@ -52,7 +51,7 @@
             // 
             this.PortTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.PortTextBox.Location = new System.Drawing.Point(116, 60);
-            this.PortTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.PortTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.PortTextBox.MaxLength = 5;
             this.PortTextBox.Multiline = true;
             this.PortTextBox.Name = "PortTextBox";
@@ -63,8 +62,8 @@
             // 
             this.ConnectBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.ConnectBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ConnectBtn.Location = new System.Drawing.Point(20, 106);
-            this.ConnectBtn.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ConnectBtn.Location = new System.Drawing.Point(32, 106);
+            this.ConnectBtn.Margin = new System.Windows.Forms.Padding(4);
             this.ConnectBtn.Name = "ConnectBtn";
             this.ConnectBtn.Size = new System.Drawing.Size(117, 43);
             this.ConnectBtn.TabIndex = 4;
@@ -98,7 +97,7 @@
             // 
             this.DisconnectBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.DisconnectBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.DisconnectBtn.Location = new System.Drawing.Point(145, 106);
+            this.DisconnectBtn.Location = new System.Drawing.Point(257, 106);
             this.DisconnectBtn.Margin = new System.Windows.Forms.Padding(4);
             this.DisconnectBtn.Name = "DisconnectBtn";
             this.DisconnectBtn.Size = new System.Drawing.Size(123, 43);
@@ -107,32 +106,18 @@
             this.DisconnectBtn.UseVisualStyleBackColor = true;
             this.DisconnectBtn.Click += new System.EventHandler(this.DisconnectBtn_Click);
             // 
-            // HostBtn
-            // 
-            this.HostBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.HostBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.HostBtn.Location = new System.Drawing.Point(276, 106);
-            this.HostBtn.Margin = new System.Windows.Forms.Padding(4);
-            this.HostBtn.Name = "HostBtn";
-            this.HostBtn.Size = new System.Drawing.Size(117, 43);
-            this.HostBtn.TabIndex = 8;
-            this.HostBtn.Text = "Host";
-            this.HostBtn.UseVisualStyleBackColor = true;
-            this.HostBtn.Click += new System.EventHandler(this.HostBtn_Click);
-            // 
             // RemoteColorEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(419, 162);
-            this.Controls.Add(this.HostBtn);
             this.Controls.Add(this.DisconnectBtn);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.ConnectBtn);
             this.Controls.Add(this.PortTextBox);
             this.Controls.Add(this.IPTextBox);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "RemoteColorEditor";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Remote Color Editor (RCE)";
@@ -148,6 +133,5 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button DisconnectBtn;
-        private System.Windows.Forms.Button HostBtn;
     }
 }

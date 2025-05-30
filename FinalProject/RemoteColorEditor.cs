@@ -1,4 +1,4 @@
-﻿using System;
+﻿    using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -81,69 +81,7 @@ namespace FinalProject
             }
         }
 
-        private void HostServer(string ipAddress, int port)
-        {
-            try
-            {
-                if (client == null && listener == null)
-                {
-                    listener = new TcpListener(IPAddress.Parse(ipAddress), port);
-                    listener.Start();
-                    MessageBox.Show("Server hosted at " + ipAddress + ":" + port);
-                    Task.Run(() => Server());
-                }
-                else if (client == null)
-                {
-                    MessageBox.Show("Already connected to server");
-                }
-                else
-                {
-                    MessageBox.Show("Already host");
-                }
-            }
-            catch
-            {
-                MessageBox.Show("Cannot host server");
-            }
-
-        }
-
-        private void Server()
-        {
-            try
-            {
-                while (true)
-                {
-                    clients.Add(listener.AcceptTcpClient());
-                    Task.Run(() => ClientHandler(clients[clients.Count() - 1]));
-                }
-            }
-            catch
-            {
-                MessageBox.Show("Server stopped");
-            }
-        }
-
-        private void ClientHandler(TcpClient _client)
-        {
-            try
-            {
-                while (true) 
-                {
-                    DrawPacket received = ReceiveBuf(_client);
-                    if (received == null)
-                        break;
-                    mainForm.DrawFromNetwork(received.Data, received.Color.ToColor());
-                }    
-            }
-            catch
-            {
-                _client.Close();
-                clients.Remove(_client);
-            }
-        }
-
-        public void SendBuf(Draw_data[] datas, int len, Color crt_color)
+        public void SendBuf(Draw_data[] datas, int len, Color crt_color, TcpClient Exeption)
         {
             if (client == null && listener == null)
                 return;
@@ -154,6 +92,8 @@ namespace FinalProject
                     try
                     {
                         TcpClient tcp = clients[i];
+                        if (tcp == Exeption)
+                            continue;
                         NetworkStream stream = tcp.GetStream();
 
                         var packet = new DrawPacket(datas.Take(len).ToArray(), crt_color);
@@ -283,34 +223,7 @@ namespace FinalProject
 
         private void HostBtn_Click(object sender, EventArgs e)
         {
-            string ipAddr = IPTextBox.Text.Trim();
-            int port = 0;
-
-            try
-            {
-                IPAddress.Parse(IPTextBox.Text.Trim());
-            }
-            catch
-            {
-                MessageBox.Show("Invalid ip address");
-                return;
-            }
-
-            if (int.TryParse(PortTextBox.Text.Trim(), out port) == false)
-            {
-                MessageBox.Show("Invalid port");
-                return;
-            }
-
-            try
-            {
-                HostServer(ipAddr, port);
-            }
-
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error hosting server: {ex.Message}");
-            }
+            
         }
     }
 }

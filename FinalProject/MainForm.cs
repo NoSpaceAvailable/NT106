@@ -23,7 +23,6 @@ namespace FinalProject
         private BufferedGraphics bufferedGraphics;
         private Point previousPoint;
         private bool isDrawing = false;
-        private string selectedButton = null;
         private RemoteColorEditor remotecoloreditor;
         private static readonly object lockObj = new object();
         public const int DOWN = 1;
@@ -250,10 +249,19 @@ namespace FinalProject
             {
                 return;
             }
-            remotecoloreditor.SendBuf(buffer, current_ptr, selectedColor);
+            remotecoloreditor.SendBuf(buffer, current_ptr, selectedColor, null);
             for (int i = 0; i < _size; i++)
                 buffer[i] = null;
             current_ptr = 0;
+        }
+
+        public void BroadCast(Draw_data[] datas, Color crt_color, TcpClient Exception)
+        {
+            if (remotecoloreditor == null || !remotecoloreditor.Visible)
+            {
+                return;
+            }
+            remotecoloreditor.SendBuf(datas, datas.Count() - 1, crt_color, Exception);
         }
 
         private void SyncWithRemote(MouseEventArgs e, int evnt)
