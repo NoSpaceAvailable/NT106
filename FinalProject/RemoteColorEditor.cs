@@ -34,37 +34,12 @@ namespace FinalProject
 
         private TcpClient client = null;
         private TcpListener listener = null;
-        private List<TcpClient> clients = new List<TcpClient>();
-        private void ConnectToServer(string ipAddress, int port)
-        {
-            try
-            {
-                if (client == null && listener == null)
-                {
-                    client = new TcpClient(ipAddress, port);
-                    MessageBox.Show("Connected to server");
-                    Task.Run(() => Client());
-                }
-                else if (client == null)
-                {
-                    MessageBox.Show("Already connected to server");
-                }
-                else
-                {
-                    MessageBox.Show("Already host");
-                }
-            }
-            catch
-            {
-                MessageBox.Show("Cannot connect to server");
-            }
-
-        }
 
         private void Client()
         {
             try
             {
+                syncWithRoom();
                 while (true)
                 {
                     DrawPacket received = ReceiveBuf(client);
@@ -81,58 +56,42 @@ namespace FinalProject
             }
         }
 
+        private void syncWithRoom()
+        {
+            if (mainForm == null)
+                return;
+            mainForm.cleanGraphics();
+            try
+            {
+                mainForm.LoadCanvasFromBytes(ReceiveByte(client));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error syncing with room: {ex.Message}");
+            }
+        }
+
         public void SendBuf(Draw_data[] datas, int len, Color crt_color, TcpClient Exeption)
         {
-            if (client == null && listener == null)
+            if (client == null)
                 return;
-            if (listener != null)
+            try
             {
-                for (int i = 0; i < clients.Count; i++)
-                {
-                    try
-                    {
-                        TcpClient tcp = clients[i];
-                        if (tcp == Exeption)
-                            continue;
-                        NetworkStream stream = tcp.GetStream();
+                TcpClient tcp = client;
+                NetworkStream stream = tcp.GetStream();
+                var packet = new DrawPacket(datas.Take(len).ToArray(), crt_color);
+                string json = JsonSerializer.Serialize(packet);
 
-                        var packet = new DrawPacket(datas.Take(len).ToArray(), crt_color);
-                        string json = JsonSerializer.Serialize(packet);
+                byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
 
-                        byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
-
-                        byte[] lengthPrefix = BitConverter.GetBytes(jsonBytes.Length);
-                        stream.Write(lengthPrefix, 0, lengthPrefix.Length);
-                        stream.Write(jsonBytes, 0, jsonBytes.Length);
-                    }
-                    catch
-                    {
-                        clients.Remove(clients[i]);
-                    }
-                }
-                return;
+                byte[] lengthPrefix = BitConverter.GetBytes(jsonBytes.Length);
+                stream.Write(lengthPrefix, 0, lengthPrefix.Length);
+                stream.Write(jsonBytes, 0, jsonBytes.Length);
             }
-            else if (client != null)
+            catch
             {
-                try
-                {
-                    TcpClient tcp = client;
-                    NetworkStream stream = tcp.GetStream();
-                    var packet = new DrawPacket(datas.Take(len).ToArray(), crt_color);
-                    string json = JsonSerializer.Serialize(packet);
-
-                    byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
-
-                    byte[] lengthPrefix = BitConverter.GetBytes(jsonBytes.Length);
-                    stream.Write(lengthPrefix, 0, lengthPrefix.Length);
-                    stream.Write(jsonBytes, 0, jsonBytes.Length);
-                }
-                catch
-                {
-                    client.Close();
-                    client = null;
-                }
-                return;
+                client.Close();
+                client = null;
             }
             return;
         }
@@ -160,6 +119,19 @@ namespace FinalProject
                 tcp.Close();
                 return null;
             }
+        }
+
+        private byte[] ReceiveByte(TcpClient tcp)
+        {
+            NetworkStream stream = tcp.GetStream();
+            byte[] lengthPrefix = new byte[4];
+            stream.Read(lengthPrefix, 0, 4);
+            int length = BitConverter.ToInt32(lengthPrefix, 0);
+            byte[] buffer = new byte[length];
+            int read = 0;
+            while(read < length)
+                read += stream.Read(buffer, read, length - read);
+            return buffer;
         }
 
         private void ConnectBtn_Click(object sender, EventArgs e)
@@ -207,23 +179,38 @@ namespace FinalProject
                         listener.Stop();
                     if (client != null)
                         client.Close();
-                    if (clients.Count != 0)
-                        for (int i = 0; i < clients.Count; i++)
-                                clients[i].Close();
-                    clients.Clear();
                     listener = null;
                     client = null;
                 }
                 catch
                 {
+                    MessageBox.Show("Disconnected");
                 }
-                MessageBox.Show("Disconnected");
             }
         }
 
-        private void HostBtn_Click(object sender, EventArgs e)
+        private void ConnectToServer(string ipAddress, int port)
         {
-            
+            try
+            {
+                if (client == null && listener == null)
+                {
+                    client = new TcpClient(ipAddress, port);
+                    MessageBox.Show("Connected to server");
+                    Task.Run(() => Client());
+                    this.Hide();
+                }
+                else if (client != null)
+                {
+                    MessageBox.Show("Already connected to server");
+                    this.Hide();
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Cannot connect to server");
+            }
+
         }
     }
 }

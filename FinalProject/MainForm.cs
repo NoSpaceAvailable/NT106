@@ -36,7 +36,8 @@ namespace FinalProject
             FreeDraw,
             Circle,
             Rectangle,
-            Triangle
+            Triangle,
+            Line
         }
 
         public class Draw_data
@@ -47,6 +48,7 @@ namespace FinalProject
             public int Y { get; set; }
             public PointData prevPoint { get; set; }
             public PointData Location { get; set; }
+            public ShapeType Shape { get; set; }
         }
 
         public class DrawPacket
@@ -112,6 +114,7 @@ namespace FinalProject
             UpdateCursor();
             LoadTools();
             InitializeBufferedGraphics();
+            EnableDoubleBuffering(DrawingArea);
         }
 
         private void InitializeBufferedGraphics()
@@ -168,7 +171,6 @@ namespace FinalProject
         {
             int buttonSize = 30;
 
-            // Add an eraser button to the ToolsPanel
             Button eraserButton = new Button();
             Bitmap eraserImage = new Bitmap(@"../../Images/EraserIcon.png");
             eraserButton.Image = new Bitmap(eraserImage, new Size(buttonSize, buttonSize));
@@ -178,7 +180,7 @@ namespace FinalProject
             eraserButton.Top = (1 / 8) * (buttonSize + 5);
             eraserButton.FlatStyle = FlatStyle.Flat;
             eraserButton.FlatAppearance.BorderSize = 0;
-            eraserButton.Tag = Color.White; // Set the eraser color to white
+            eraserButton.Tag = Color.White;
             eraserButton.Click += toolsSelection_Click;
             eraserButton.MouseEnter += ColorBtn_MouseEnter;
             eraserButton.MouseLeave += ColorBtn_MouseLeave;
@@ -235,6 +237,25 @@ namespace FinalProject
             };
             triangleButton.Click += ShapeButton_Click;
             ToolsPanel.Controls.Add(triangleButton);
+
+            Button lineButton = new Button
+            {
+                Text = "/",
+                Width = buttonSize,
+                Height = buttonSize,
+                Left = (5 % 8) * (buttonSize + 5),
+                Top = (5 / 8) * (buttonSize + 5),
+                FlatStyle = FlatStyle.Flat,
+                Tag = ShapeType.Line
+            };
+            lineButton.Click += ShapeButton_Click;
+            ToolsPanel.Controls.Add(lineButton);
+        }
+        private void EnableDoubleBuffering(Control c)
+        {
+            c.GetType()
+             .GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+             ?.SetValue(c, true, null);
         }
 
         private void ShapeButton_Click(object sender, EventArgs e)
@@ -331,28 +352,19 @@ namespace FinalProject
             UpdateCursor();
         }
 
+        //Flush buffer to remote editor
         private void FlushBuf()
         {
-            if (remotecoloreditor == null || !remotecoloreditor.Visible)
+            if (remotecoloreditor == null || remotecoloreditor.IsDisposed)
             {
                 return;
             }
             remotecoloreditor.SendBuf(buffer, current_ptr, selectedColor, null);
-            for (int i = 0; i < _size; i++)
-                buffer[i] = null;
             current_ptr = 0;
         }
 
-        public void BroadCast(Draw_data[] datas, Color crt_color, TcpClient Exception)
-        {
-            if (remotecoloreditor == null || !remotecoloreditor.Visible)
-            {
-                return;
-            }
-            remotecoloreditor.SendBuf(datas, datas.Count() - 1, crt_color, Exception);
-        }
-
-        private void SyncWithRemote(MouseEventArgs e, int evnt)
+        //Save drawing data to buffer and sync with remote editor if buffer is full
+        private void SyncWithRemote(MouseEventArgs e, int evnt, ShapeType shape)
         {
             buffer[current_ptr++] = new Draw_data
             {
@@ -361,7 +373,8 @@ namespace FinalProject
                 penWid = penWidth,
                 X = e.X,
                 Y = e.Y,
-                Location = new PointData(e.Location)
+                Location = new PointData(e.Location),
+                Shape = shape
             };
             if (current_ptr == _size)
             {
@@ -392,7 +405,7 @@ namespace FinalProject
                 lock (lockObj) bufferedGraphics.Render(DrawingArea.CreateGraphics());
             }
 
-            SyncWithRemote(e, DOWN);
+            SyncWithRemote(e, DOWN, currentShape);
         }
 
         private void DrawingArea_MouseMove(object sender, MouseEventArgs e)
@@ -415,17 +428,14 @@ namespace FinalProject
                 }
 
                 lock (lockObj) bufferedGraphics.Render(DrawingArea.CreateGraphics());
-                SyncWithRemote(e, MOVE);
+                SyncWithRemote(e, MOVE, currentShape);
                 previousPoint = e.Location;
             }
             else
             {
-                DrawingArea.Refresh();
-                using (Graphics g = DrawingArea.CreateGraphics())
-                {
-                    g.SmoothingMode = SmoothingMode.AntiAlias;
-                    DrawShapeOnGraphics(g, previousPoint, e.Location);
-                }
+                previewGraphics.Clear(Color.Transparent);
+                DrawShapeOnGraphics(previewGraphics, previousPoint, e.Location, currentShape, selectedColor);
+                DrawingArea.Invalidate();
             }
         }
 
@@ -436,11 +446,28 @@ namespace FinalProject
 
             if (currentShape != ShapeType.FreeDraw)
             {
-                DrawShape(previousPoint, e.Location);
-                previewBitmap.Dispose();
+                DrawShape(previousPoint, e.Location, currentShape, selectedColor);
+
+                buffer[current_ptr++] = new Draw_data
+                {
+                    Event = UP,
+                    prevPoint = new PointData(previousPoint),
+                    penWid = penWidth,
+                    X = e.X,
+                    Y = e.Y,
+                    Location = new PointData(e.Location),
+                    Shape = currentShape
+                };
+
+                if (current_ptr == _size)
+                {
+                    FlushBuf();
+                }
+
                 previewGraphics.Dispose();
-                previewBitmap = null;
+                previewBitmap.Dispose();
                 previewGraphics = null;
+                previewBitmap = null;
             }
 
             FlushBuf();
@@ -448,24 +475,29 @@ namespace FinalProject
 
         private void DrawingArea_Paint(object sender, PaintEventArgs e)
         {
-            lock (lockObj) bufferedGraphics.Render(e.Graphics);
+            lock (lockObj)
+            {
+                bufferedGraphics.Render(e.Graphics);
+            }
 
             if (previewBitmap != null)
             {
                 e.Graphics.DrawImage(previewBitmap, Point.Empty);
             }
         }
-
-        private void DrawShape(Point start, Point end)
+        
+        //Draw shape on buffer and render to graphics
+        private void DrawShape(Point start, Point end, ShapeType shape, Color color)
         {
             lock (lockObj)
             {
-                DrawShapeOnGraphics(bufferedGraphics.Graphics, start, end);
+                DrawShapeOnGraphics(bufferedGraphics.Graphics, start, end, shape, color);
                 bufferedGraphics.Render(DrawingArea.CreateGraphics());
             }
         }
         
-        private void DrawShapeOnGraphics(Graphics g, Point start, Point end)
+        //Draw shape on offscreen buffer
+        private void DrawShapeOnGraphics(Graphics g, Point start, Point end, ShapeType shape, Color color)
         {
             Rectangle rect = new Rectangle(
                 Math.Min(start.X, end.X),
@@ -474,9 +506,9 @@ namespace FinalProject
                 Math.Abs(end.Y - start.Y)
             );
 
-            using (Pen pen = new Pen(selectedColor, penWidth))
+            using (Pen pen = new Pen(color, penWidth))
             {
-                switch (currentShape)
+                switch (shape)
                 {
                     case ShapeType.Circle:
                         g.DrawEllipse(pen, rect);
@@ -493,10 +525,16 @@ namespace FinalProject
                         Point[] trianglePoints = { top, left, right };
                         g.DrawPolygon(pen, trianglePoints);
                         break;
+
+                    case ShapeType.Line:
+                        g.DrawLine(pen, start, end);
+                        break;
+
                 }
             }
         }
-
+        
+        //Drawing package received from network
         public void DrawFromNetwork(Draw_data[] datas, Color crt_color)
         {
             Point prevPoint = new Point(0, 0);
@@ -507,32 +545,41 @@ namespace FinalProject
                     case DOWN:
                         prevPoint = x.Location.ToPoint();
 
-                        // Draw the initial point
-                        using (Brush brush = new SolidBrush(crt_color))
+                        if (x.Shape == ShapeType.FreeDraw)
                         {
-                            lock (lockObj) bufferedGraphics.Graphics.FillEllipse(brush,
-                                x.X - x.penWid / 2, x.Y - x.penWid / 2, x.penWid, x.penWid);
-                        }
-                        lock (lockObj) bufferedGraphics.Render(DrawingArea.CreateGraphics());
-                        break;
-                    case MOVE:
-                        using (Pen pen = new Pen(crt_color, x.penWid))
-                        {
-                            pen.StartCap = LineCap.Round;
-                            pen.EndCap = LineCap.Round;
-                            lock (lockObj) bufferedGraphics.Graphics.DrawLine(pen, prevPoint, x.Location.ToPoint());
+                            using (Brush brush = new SolidBrush(crt_color))
+                            {
+                                lock (lockObj) bufferedGraphics.Graphics.FillEllipse(brush,
+                                    x.X - x.penWid / 2, x.Y - x.penWid / 2, x.penWid, x.penWid);
+                            }
+                            lock (lockObj) bufferedGraphics.Render(DrawingArea.CreateGraphics());
                         }
 
-                        // Also draw a circle at the current position for better coverage
-                        using (Brush brush = new SolidBrush(crt_color))
-                        {
-                            lock (lockObj) bufferedGraphics.Graphics.FillEllipse(brush,
-                                x.X - x.penWid / 2, x.Y - x.penWid / 2, x.penWid, x.penWid);
+                        break;
+                    case MOVE:
+                        if(x.Shape == ShapeType.FreeDraw)
+                        { 
+                            using (Pen pen = new Pen(crt_color, x.penWid))
+                            {
+                                pen.StartCap = LineCap.Round;
+                                pen.EndCap = LineCap.Round;
+                                lock (lockObj) bufferedGraphics.Graphics.DrawLine(pen, prevPoint, x.Location.ToPoint());
+                            }
+
+                            using (Brush brush = new SolidBrush(crt_color))
+                            {
+                                lock (lockObj) bufferedGraphics.Graphics.FillEllipse(brush,
+                                    x.X - x.penWid / 2, x.Y - x.penWid / 2, x.penWid, x.penWid);
+                            }
+                            lock (lockObj) bufferedGraphics.Render(DrawingArea.CreateGraphics());
+                                prevPoint = x.Location.ToPoint();
                         }
-                        lock (lockObj) bufferedGraphics.Render(DrawingArea.CreateGraphics());
-                        prevPoint = x.Location.ToPoint();
                         break;
                     case UP:
+                        if (x.Shape != ShapeType.FreeDraw)
+                        {
+                            DrawShape(prevPoint, x.Location.ToPoint(), x.Shape, crt_color);
+                        }
                         break;
                     default:
                         break;
@@ -542,7 +589,6 @@ namespace FinalProject
 
         private void DrawingArea_Resize(object sender, EventArgs e)
         {
-            // Reinitialize the buffer when the drawing area is resized
             if (bufferedGraphics != null)
             {
                 lock (lockObj) bufferedGraphics.Dispose();
@@ -553,8 +599,54 @@ namespace FinalProject
 
         private void button1_Click(object sender, EventArgs e)
         {
-            remotecoloreditor = new RemoteColorEditor(this);
+            if(remotecoloreditor == null || remotecoloreditor.IsDisposed)
+                remotecoloreditor = new RemoteColorEditor(this);
             remotecoloreditor.Show();
+        }
+
+        public void cleanGraphics()
+        {
+            if (bufferedGraphics != null)
+            {
+                lock (lockObj)
+                {
+                    bufferedGraphics.Dispose();
+
+                    InitializeBufferedGraphics();
+
+                    bufferedGraphics.Graphics.Clear(Color.White);
+
+                    bufferedGraphics.Render(DrawingArea.CreateGraphics());
+                }
+            }
+
+            previewGraphics?.Dispose();
+            previewBitmap?.Dispose();
+            previewGraphics = null;
+            previewBitmap = null;
+
+            DrawingArea.Invalidate();
+        }
+
+        public void LoadCanvasFromBytes(byte[] data)
+        {
+            using (MemoryStream ms = new MemoryStream(data))
+            {
+                Image img = Image.FromStream(ms);
+
+                lock (lockObj)
+                {
+                    bufferedGraphics.Graphics.DrawImage(img, 0, 0);
+                    bufferedGraphics.Render(DrawingArea.CreateGraphics());
+                }
+            }
+
+            DrawingArea.Invalidate();
+        }
+
+        public void renderGraphic()
+        {
+
         }
     }
 }

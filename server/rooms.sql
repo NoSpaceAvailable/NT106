@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS rooms (
+    room_id TEXT PRIMARY KEY,
+    canvas BLOB NOT NULL
+);

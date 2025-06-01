@@ -32,63 +32,65 @@ namespace FinalProject
             // 
             // ColorsPanel
             // 
-            this.ColorsPanel.BackColor = Color.FromArgb(255, 245, 235); // warm peach
-            this.ColorsPanel.BorderStyle = BorderStyle.FixedSingle;
-            this.ColorsPanel.Location = new Point(15, 15);
-            this.ColorsPanel.Margin = new Padding(10);
+            this.ColorsPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(245)))), ((int)(((byte)(235)))));
+            this.ColorsPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.ColorsPanel.Location = new System.Drawing.Point(20, 18);
+            this.ColorsPanel.Margin = new System.Windows.Forms.Padding(13, 12, 13, 12);
             this.ColorsPanel.Name = "ColorsPanel";
-            this.ColorsPanel.Size = new Size(447, 81);
+            this.ColorsPanel.Size = new System.Drawing.Size(595, 99);
             this.ColorsPanel.TabIndex = 0;
             // 
             // DrawingArea
             // 
-            this.DrawingArea.BackColor = Color.FromArgb(255, 255, 250); // off white
-            this.DrawingArea.BorderStyle = BorderStyle.FixedSingle;
-            this.DrawingArea.Location = new Point(-3, 125);
-            this.DrawingArea.Margin = new Padding(2);
+            this.DrawingArea.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(250)))));
+            this.DrawingArea.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.DrawingArea.Location = new System.Drawing.Point(-4, 154);
+            this.DrawingArea.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.DrawingArea.Name = "DrawingArea";
-            this.DrawingArea.Size = new Size(1159, 587);
-            this.DrawingArea.SizeMode = PictureBoxSizeMode.CenterImage;
+            this.DrawingArea.Size = new System.Drawing.Size(1545, 722);
+            this.DrawingArea.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.DrawingArea.TabIndex = 1;
             this.DrawingArea.TabStop = false;
-            this.DrawingArea.Paint += new PaintEventHandler(this.DrawingArea_Paint);
-            this.DrawingArea.MouseDown += new MouseEventHandler(this.DrawingArea_MouseDown);
-            this.DrawingArea.MouseMove += new MouseEventHandler(this.DrawingArea_MouseMove);
-            this.DrawingArea.MouseUp += new MouseEventHandler(this.DrawingArea_MouseUp);
+            this.DrawingArea.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawingArea_Paint);
+            this.DrawingArea.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DrawingArea_MouseDown);
+            this.DrawingArea.MouseMove += new System.Windows.Forms.MouseEventHandler(this.DrawingArea_MouseMove);
+            this.DrawingArea.MouseUp += new System.Windows.Forms.MouseEventHandler(this.DrawingArea_MouseUp);
             // 
             // CursorSizeAdjust
             // 
             this.CursorSizeAdjust.AutoSize = false;
-            this.CursorSizeAdjust.BackColor = Color.FromArgb(230, 245, 255); // pastel blue
-            this.CursorSizeAdjust.Location = new Point(17, 100);
-            this.CursorSizeAdjust.Margin = new Padding(2);
+            this.CursorSizeAdjust.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(245)))), ((int)(((byte)(255)))));
+            this.CursorSizeAdjust.Location = new System.Drawing.Point(23, 123);
+            this.CursorSizeAdjust.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.CursorSizeAdjust.Maximum = 30;
             this.CursorSizeAdjust.Minimum = 1;
             this.CursorSizeAdjust.Name = "CursorSizeAdjust";
-            this.CursorSizeAdjust.Size = new Size(187, 21);
+            this.CursorSizeAdjust.Size = new System.Drawing.Size(249, 26);
             this.CursorSizeAdjust.TabIndex = 2;
-            this.CursorSizeAdjust.TickStyle = TickStyle.None;
+            this.CursorSizeAdjust.TickStyle = System.Windows.Forms.TickStyle.None;
             this.CursorSizeAdjust.Value = 5;
             // 
             // ToolsPanel
             // 
-            this.ToolsPanel.BackColor = Color.FromArgb(240, 255, 240); // mint green
-            this.ToolsPanel.BorderStyle = BorderStyle.FixedSingle;
-            this.ToolsPanel.Location = new Point(486, 15);
+            this.ToolsPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(255)))), ((int)(((byte)(240)))));
+            this.ToolsPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.ToolsPanel.Location = new System.Drawing.Point(648, 18);
+            this.ToolsPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.ToolsPanel.Name = "ToolsPanel";
-            this.ToolsPanel.Size = new Size(200, 81);
+            this.ToolsPanel.Size = new System.Drawing.Size(356, 99);
             this.ToolsPanel.TabIndex = 3;
             // 
             // button1
             // 
-            this.button1.FlatStyle = FlatStyle.Flat;
+            this.button1.BackColor = System.Drawing.Color.MediumSlateBlue;
             this.button1.FlatAppearance.BorderSize = 0;
-            this.button1.BackColor = Color.MediumSlateBlue;
-            this.button1.ForeColor = Color.White;
-            this.button1.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            this.button1.Location = new Point(1065, 12);
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.button1.ForeColor = System.Drawing.Color.White;
+            this.button1.Location = new System.Drawing.Point(1420, 15);
+            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button1.Name = "button1";
-            this.button1.Size = new Size(75, 30);
+            this.button1.Size = new System.Drawing.Size(100, 37);
             this.button1.TabIndex = 4;
             this.button1.Text = "RCE";
             this.button1.UseVisualStyleBackColor = true;
@@ -96,23 +98,25 @@ namespace FinalProject
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new SizeF(6F, 13F);
-            this.AutoScaleMode = AutoScaleMode.Font;
-            this.BackColor = Color.FromArgb(250, 250, 255); // very light violet
-            this.ClientSize = new Size(1155, 712);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(255)))));
+            this.ClientSize = new System.Drawing.Size(1540, 876);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.ToolsPanel);
             this.Controls.Add(this.CursorSizeAdjust);
             this.Controls.Add(this.DrawingArea);
             this.Controls.Add(this.ColorsPanel);
-            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "MainForm";
-            this.Padding = new Padding(10);
-            this.StartPosition = FormStartPosition.CenterScreen;
+            this.Padding = new System.Windows.Forms.Padding(13, 12, 13, 12);
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Advanced Paint";
             ((System.ComponentModel.ISupportInitialize)(this.DrawingArea)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.CursorSizeAdjust)).EndInit();
             this.ResumeLayout(false);
+
         }
 
         #endregion
