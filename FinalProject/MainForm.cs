@@ -24,10 +24,21 @@ namespace FinalProject
         private Point previousPoint;
         private bool isDrawing = false;
         private RemoteColorEditor remotecoloreditor;
+        private Bitmap previewBitmap;
+        private Graphics previewGraphics;
         private static readonly object lockObj = new object();
         public const int DOWN = 1;
         public const int MOVE = 2;
         public const int UP = 3;
+
+        public enum ShapeType
+        {
+            FreeDraw,
+            Circle,
+            Rectangle,
+            Triangle
+        }
+
         public class Draw_data
         {
             public int Event { get; set; }
@@ -37,6 +48,7 @@ namespace FinalProject
             public PointData prevPoint { get; set; }
             public PointData Location { get; set; }
         }
+
         public class DrawPacket
         {
             public Draw_data[] Data { get; set; }
@@ -89,6 +101,7 @@ namespace FinalProject
 
         private const long _size = 4096 * 4096;
         private Draw_data[] buffer = new Draw_data[_size];
+        private ShapeType currentShape = ShapeType.FreeDraw;
         private int current_ptr = 0;
 
         public MainForm()
@@ -170,6 +183,66 @@ namespace FinalProject
             eraserButton.MouseEnter += ColorBtn_MouseEnter;
             eraserButton.MouseLeave += ColorBtn_MouseLeave;
             ToolsPanel.Controls.Add(eraserButton);
+
+            Button freeDrawButton = new Button
+            {
+                Text = "✏️",
+                Width = buttonSize,
+                Height = buttonSize,
+                Left = (0 % 8) * (buttonSize + 5),
+                Top = (0 / 8) * (buttonSize + 5),
+                FlatStyle = FlatStyle.Flat,
+                Tag = ShapeType.FreeDraw
+            };
+            freeDrawButton.Click += ShapeButton_Click;
+            ToolsPanel.Controls.Add(freeDrawButton);
+
+            Button circleButton = new Button
+            {
+                Text = "⚪",
+                Width = buttonSize,
+                Height = buttonSize,
+                Left = (2 % 8) * (buttonSize + 5),
+                Top = (2 / 8) * (buttonSize + 5),
+                FlatStyle = FlatStyle.Flat,
+                Tag = ShapeType.Circle
+            };
+            circleButton.Click += ShapeButton_Click;
+            ToolsPanel.Controls.Add(circleButton);
+
+            Button RectangleButton = new Button
+            {
+                Text = "⬛",
+                Width = buttonSize,
+                Height = buttonSize,
+                Left = (3 % 8) * (buttonSize + 5),
+                Top = (3 / 8) * (buttonSize + 5),
+                FlatStyle = FlatStyle.Flat,
+                Tag = ShapeType.Rectangle
+            };
+            RectangleButton.Click += ShapeButton_Click;
+            ToolsPanel.Controls.Add(RectangleButton);
+
+            Button triangleButton = new Button
+            {
+                Text = "🔺",
+                Width = buttonSize,
+                Height = buttonSize,
+                Left = (4 % 8) * (buttonSize + 5),
+                Top = (4 / 8) * (buttonSize + 5),
+                FlatStyle = FlatStyle.Flat,
+                Tag = ShapeType.Triangle
+            };
+            triangleButton.Click += ShapeButton_Click;
+            ToolsPanel.Controls.Add(triangleButton);
+        }
+
+        private void ShapeButton_Click(object sender, EventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is ShapeType shape)
+            {
+                currentShape = shape;
+            }
         }
 
         private void LoadColorPalette()
@@ -182,29 +255,44 @@ namespace FinalProject
             };
 
             int buttonSize = 30;
-            for (int i = 0; i < colors.Length; i++)
+            for (int i = 0; i <= colors.Length; i++)
             {
-                Button colorBtn = new Button();
-                colorBtn.BackColor = colors[i];
-                colorBtn.Width = buttonSize;
-                colorBtn.Height = buttonSize;
-                colorBtn.Left = (i % 8) * (buttonSize + 5);
-                colorBtn.Top = (i / 8) * (buttonSize + 5);
-                colorBtn.FlatStyle = FlatStyle.Flat;
+                if(i == colors.Length)
+                {
+                    Button customBtn = new Button
+                    {
+                        Text = "⚙️",
+                        Width = buttonSize,
+                        Height = buttonSize,
+                        Left = (i % 8) * (buttonSize + 5),
+                        Top = (i / 8) * (buttonSize + 5),
+                        FlatStyle = FlatStyle.Flat,
+                        Tag = Color.Black
+                    };
+                    customBtn.FlatAppearance.BorderSize = 1;
+                    customBtn.Click += ColorBtn_Click;
+                    customBtn.MouseEnter += ColorBtn_MouseEnter;
+                    customBtn.MouseLeave += ColorBtn_MouseLeave;
+                    ColorsPanel.Controls.Add(customBtn);
+                    customColorButton = customBtn;
+                    customColorButton.Click += customColorButton_Click;
+                    break;
+                }
+                Button colorBtn = new Button
+                {
+                    BackColor = colors[i],
+                    Width = buttonSize,
+                    Height = buttonSize,
+                    Left = (i % 8) * (buttonSize + 5),
+                    Top = (i / 8) * (buttonSize + 5),
+                    FlatStyle = FlatStyle.Flat,
+                    Tag = colors[i]
+                };
                 colorBtn.FlatAppearance.BorderSize = 1;
-                colorBtn.Tag = colors[i];
                 colorBtn.Click += ColorBtn_Click;
-
                 colorBtn.MouseEnter += ColorBtn_MouseEnter;
                 colorBtn.MouseLeave += ColorBtn_MouseLeave;
-
                 ColorsPanel.Controls.Add(colorBtn);
-
-                if (i == colors.Length - 1)
-                {
-                    customColorButton = colorBtn;
-                    customColorButton.Click += customColorButton_Click;
-                }
             }
         }
 
@@ -288,13 +376,22 @@ namespace FinalProject
             isDrawing = true;
             previousPoint = e.Location;
 
-            // Draw the initial point
-            using (Brush brush = new SolidBrush(selectedColor))
+            if (currentShape != ShapeType.FreeDraw)
             {
-                lock (lockObj) bufferedGraphics.Graphics.FillEllipse(brush,
-                    e.X - penWidth / 2, e.Y - penWidth / 2, penWidth, penWidth);
+                previewBitmap = new Bitmap(DrawingArea.Width, DrawingArea.Height);
+                previewGraphics = Graphics.FromImage(previewBitmap);
+                previewGraphics.SmoothingMode = SmoothingMode.AntiAlias;
             }
-            lock (lockObj) bufferedGraphics.Render(DrawingArea.CreateGraphics());
+            else
+            {
+                using (Brush brush = new SolidBrush(selectedColor))
+                {
+                    lock (lockObj) bufferedGraphics.Graphics.FillEllipse(brush,
+                        e.X - penWidth / 2, e.Y - penWidth / 2, penWidth, penWidth);
+                }
+                lock (lockObj) bufferedGraphics.Render(DrawingArea.CreateGraphics());
+            }
+
             SyncWithRemote(e, DOWN);
         }
 
@@ -302,34 +399,102 @@ namespace FinalProject
         {
             if (!isDrawing || e.Button != MouseButtons.Left) return;
 
-            // Draw a line between the previous point and current point to fill gaps
-            using (Pen pen = new Pen(selectedColor, penWidth))
+            if (currentShape == ShapeType.FreeDraw)
             {
-                pen.StartCap = LineCap.Round;
-                pen.EndCap = LineCap.Round;
-                lock (lockObj) bufferedGraphics.Graphics.DrawLine(pen, previousPoint, e.Location);
-            }
+                using (Pen pen = new Pen(selectedColor, penWidth))
+                {
+                    pen.StartCap = LineCap.Round;
+                    pen.EndCap = LineCap.Round;
+                    lock (lockObj) bufferedGraphics.Graphics.DrawLine(pen, previousPoint, e.Location);
+                }
 
-            // Also draw a circle at the current position for better coverage
-            using (Brush brush = new SolidBrush(selectedColor))
-            {
-                lock (lockObj) bufferedGraphics.Graphics.FillEllipse(brush,
-                    e.X - penWidth / 2, e.Y - penWidth / 2, penWidth, penWidth);
+                using (Brush brush = new SolidBrush(selectedColor))
+                {
+                    lock (lockObj) bufferedGraphics.Graphics.FillEllipse(brush,
+                        e.X - penWidth / 2, e.Y - penWidth / 2, penWidth, penWidth);
+                }
+
+                lock (lockObj) bufferedGraphics.Render(DrawingArea.CreateGraphics());
+                SyncWithRemote(e, MOVE);
+                previousPoint = e.Location;
             }
-            lock (lockObj) bufferedGraphics.Render(DrawingArea.CreateGraphics());
-            SyncWithRemote(e, MOVE);
-            previousPoint = e.Location;
+            else
+            {
+                DrawingArea.Refresh();
+                using (Graphics g = DrawingArea.CreateGraphics())
+                {
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    DrawShapeOnGraphics(g, previousPoint, e.Location);
+                }
+            }
         }
 
         private void DrawingArea_MouseUp(object sender, MouseEventArgs e)
         {
+            if (!isDrawing) return;
             isDrawing = false;
+
+            if (currentShape != ShapeType.FreeDraw)
+            {
+                DrawShape(previousPoint, e.Location);
+                previewBitmap.Dispose();
+                previewGraphics.Dispose();
+                previewBitmap = null;
+                previewGraphics = null;
+            }
+
             FlushBuf();
         }
 
         private void DrawingArea_Paint(object sender, PaintEventArgs e)
         {
             lock (lockObj) bufferedGraphics.Render(e.Graphics);
+
+            if (previewBitmap != null)
+            {
+                e.Graphics.DrawImage(previewBitmap, Point.Empty);
+            }
+        }
+
+        private void DrawShape(Point start, Point end)
+        {
+            lock (lockObj)
+            {
+                DrawShapeOnGraphics(bufferedGraphics.Graphics, start, end);
+                bufferedGraphics.Render(DrawingArea.CreateGraphics());
+            }
+        }
+        
+        private void DrawShapeOnGraphics(Graphics g, Point start, Point end)
+        {
+            Rectangle rect = new Rectangle(
+                Math.Min(start.X, end.X),
+                Math.Min(start.Y, end.Y),
+                Math.Abs(end.X - start.X),
+                Math.Abs(end.Y - start.Y)
+            );
+
+            using (Pen pen = new Pen(selectedColor, penWidth))
+            {
+                switch (currentShape)
+                {
+                    case ShapeType.Circle:
+                        g.DrawEllipse(pen, rect);
+                        break;
+
+                    case ShapeType.Rectangle:
+                        g.DrawRectangle(pen, rect);
+                        break;
+
+                    case ShapeType.Triangle:
+                        Point top = new Point(rect.X + rect.Width / 2, rect.Y);
+                        Point left = new Point(rect.X, rect.Y + rect.Height);
+                        Point right = new Point(rect.X + rect.Width, rect.Y + rect.Height);
+                        Point[] trianglePoints = { top, left, right };
+                        g.DrawPolygon(pen, trianglePoints);
+                        break;
+                }
+            }
         }
 
         public void DrawFromNetwork(Draw_data[] datas, Color crt_color)
