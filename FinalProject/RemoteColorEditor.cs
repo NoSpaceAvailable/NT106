@@ -138,6 +138,7 @@ namespace FinalProject
         {
             string ipAddr = IPTextBox.Text.Trim();
             int port = 0;
+            int room = 0;
 
             try
             {
@@ -155,9 +156,14 @@ namespace FinalProject
                 return;
             }
 
+            if (int.TryParse(RoomTextBox.Text.Trim(), out room) == false || room == 0)
+            {
+                MessageBox.Show("Invalid room id");
+            }
+
             try
             {
-                ConnectToServer(ipAddr, port);
+                ConnectToServer(ipAddr, port, room);
             }
             catch (Exception ex)
             {
@@ -189,7 +195,7 @@ namespace FinalProject
             }
         }
 
-        private void ConnectToServer(string ipAddress, int port)
+        private void ConnectToServer(string ipAddress, int port, int room)
         {
             try
             {
@@ -197,6 +203,10 @@ namespace FinalProject
                 {
                     client = new TcpClient(ipAddress, port);
                     MessageBox.Show("Connected to server");
+                    NetworkStream stream = client.GetStream();
+                    byte[] lengthPrefix = BitConverter.GetBytes(room);
+                    stream.Write(lengthPrefix, 0, lengthPrefix.Length);
+                    MessageBox.Show(lengthPrefix.Length.ToString() + "Byte send to connect to room" + room.ToString());
                     Task.Run(() => Client());
                     this.Hide();
                 }
