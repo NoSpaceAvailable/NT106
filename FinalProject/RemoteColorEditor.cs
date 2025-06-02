@@ -123,15 +123,24 @@ namespace FinalProject
 
         private byte[] ReceiveByte(TcpClient tcp)
         {
-            NetworkStream stream = tcp.GetStream();
-            byte[] lengthPrefix = new byte[4];
-            stream.Read(lengthPrefix, 0, 4);
-            int length = BitConverter.ToInt32(lengthPrefix, 0);
-            byte[] buffer = new byte[length];
-            int read = 0;
-            while(read < length)
-                read += stream.Read(buffer, read, length - read);
-            return buffer;
+            try
+            {
+                NetworkStream stream = tcp.GetStream();
+                byte[] lengthPrefix = new byte[4];
+                stream.Read(lengthPrefix, 0, 4);
+                int length = BitConverter.ToInt32(lengthPrefix, 0);
+                byte[] buffer = new byte[length];
+                int read = 0;
+                while (read < length)
+                    read += stream.Read(buffer, read, length - read);
+                return buffer;
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show($"Error receiving data: {ex.Message}");
+                tcp.Close();
+                return null;
+            }
         }
 
         private void ConnectBtn_Click(object sender, EventArgs e)

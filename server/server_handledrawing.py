@@ -97,20 +97,18 @@ def save_room_image_to_db(room_id, pil_image):
     buf = io.BytesIO()
     pil_image.save(buf, format="PNG")
     image_bytes = buf.getvalue()
-    with lock:
-        conn = sqlite3.connect("rooms.sql")
-        c = conn.cursor()
-        c.execute("REPLACE INTO room_snapshots (room_id, image) VALUES (?, ?)", (room_id, image_bytes))
-        conn.commit()
-        conn.close()
+    conn = sqlite3.connect("rooms.sql")
+    c = conn.cursor()
+    c.execute("REPLACE INTO room_snapshots (room_id, image) VALUES (?, ?)", (room_id, image_bytes))
+    conn.commit()
+    conn.close()
 
 def load_room_image_from_db(room_id):
-    with lock:
-        conn = sqlite3.connect("rooms.sql")
-        c = conn.cursor()
-        c.execute("SELECT image FROM room_snapshots WHERE room_id = ?", (room_id,))
-        row = c.fetchone()
-        conn.close()
+    conn = sqlite3.connect("rooms.sql")
+    c = conn.cursor()
+    c.execute("SELECT image FROM room_snapshots WHERE room_id = ?", (room_id,))
+    row = c.fetchone()
+    conn.close()
 
     if row:
         return Image.open(io.BytesIO(row[0]))
@@ -119,6 +117,7 @@ def load_room_image_from_db(room_id):
 
 def send_canvas_to_client(client_socket, room_id):
     try:
+        print(f"[+] Trying sent canvas snapshot of room {room_id} to client")
         canvas = rooms[room_id]["canvas"]
         buf = io.BytesIO()
         canvas.save(buf, format="PNG")
@@ -148,13 +147,14 @@ def handle_client(client_socket, addr):
             if snapshot:
                 canvas = snapshot
             else:
-                canvas = Image.new("RGBA", (width, height), (255, 255, 255))
+                canvas = Image.new("RGB", (width, height), (255, 255, 255))
             
             rooms[room_id] = {
                 "canvas": canvas,
                 "draw": ImageDraw.Draw(canvas)
             }
 
+        print(f"[+] Client {addr} connected to room {room_id}")
         rooms_clients[room_id].append(client_socket)
         send_canvas_to_client(client_socket, room_id)
 
