@@ -1,0 +1,9 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+COPY requirements.txt ./requirements.txt
+COPY server_handledrawing.py ./server_handledrawing.py
+
+RUN pip install -r requirements.txt
+
+CMD ["sh", "-c", "python3 server_handledrawing.py 0.0.0.0 $IN_PORT $OUT_PORT"]

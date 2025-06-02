@@ -14,6 +14,7 @@ rooms = {}
 
 HOST = '0.0.0.0'
 IN_PORT = 9999
+DB = "room.sql"
 width, height = 1545, 722
 
 lock = threading.Lock()
@@ -97,14 +98,14 @@ def save_room_image_to_db(room_id, pil_image):
     buf = io.BytesIO()
     pil_image.save(buf, format="PNG")
     image_bytes = buf.getvalue()
-    conn = sqlite3.connect("rooms.sql")
+    conn = sqlite3.connect(DB)
     c = conn.cursor()
     c.execute("REPLACE INTO room_snapshots (room_id, image) VALUES (?, ?)", (room_id, image_bytes))
     conn.commit()
     conn.close()
 
 def load_room_image_from_db(room_id):
-    conn = sqlite3.connect("rooms.sql")
+    conn = sqlite3.connect(DB)
     c = conn.cursor()
     c.execute("SELECT image FROM room_snapshots WHERE room_id = ?", (room_id,))
     row = c.fetchone()
@@ -156,6 +157,7 @@ def handle_client(client_socket, addr):
 
         print(f"[+] Client {addr} connected to room {room_id}")
         rooms_clients[room_id].append(client_socket)
+        save_room_image_to_db(room_id, rooms[room_id]["canvas"])
         send_canvas_to_client(client_socket, room_id)
 
     try:
@@ -180,10 +182,6 @@ def handle_client(client_socket, addr):
             full_message = raw_len + data
             apply_draw_packet_to_room(room_id, full_message)
             broadcast_to_room(room_id, full_message, client_socket)
-            count += 1
-            count %= 10
-            if not count:
-                save_room_image_to_db(room_id, rooms[room_id]["canvas"])
 
     except Exception as e:
         print(f"[!] Error with {addr}: {e}")

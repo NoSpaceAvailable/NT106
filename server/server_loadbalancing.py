@@ -1,14 +1,21 @@
 import socket
 import json
 import threading
+import sys
 
-SERVERS = [
-    {"host": "127.0.0.1", "in_port": 9999, "out_port": 10099},
-    {"host": "127.0.0.1", "in_port": 9998, "out_port": 10098}
-]
-
+SERVERS = []
 LB_HOST = '0.0.0.0'
 LB_PORT = 9000
+
+def load_servers_from_json(path="servers.json"):
+    global SERVERS
+    try:
+        with open(path, "r") as f:
+            SERVERS = json.load(f)
+            print(f"[+] Loaded {len(SERVERS)} servers from {path}")
+    except Exception as e:
+        print(f"[!] Failed to load server list from {path}: {e}")
+        exit(1)
 
 def get_server_load(server):
     try:
@@ -17,7 +24,7 @@ def get_server_load(server):
             status = json.loads(data.decode())
             return status.get("load", float('inf'))
     except Exception as e:
-        print(f"[!] Failed to get load from {server['host']}:{server['out_port']}: {e}")
+        print(f"[!] Cannot get load from {server['host']}:{server['out_port']}: {e}")
         return float('inf')
 
 def choose_best_server():
@@ -68,4 +75,13 @@ def start_load_balancer():
         lb_sock.close()
 
 if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print("Usage: python3 server_loadbalancing.py <LB_HOST> <LB_PORT> [<servers.json>]")
+        sys.exit(1)
+
+    LB_HOST = sys.argv[1]
+    LB_PORT = int(sys.argv[2])
+    json_path = sys.argv[3] if len(sys.argv) > 3 else "servers.json"
+
+    load_servers_from_json(json_path)
     start_load_balancer()
