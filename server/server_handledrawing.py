@@ -3,48 +3,30 @@ import threading
 import struct
 import sys
 from PIL import Image, ImageDraw
+import aggdraw
 import io
 import json
-# import sqlite3
+import sqlite3
+from collections import defaultdict
 
+rooms_clients = defaultdict(list)
 rooms = {}
 
 HOST = '0.0.0.0'
 IN_PORT = 9999
 width, height = 1545, 722
 
-clients = []
 lock = threading.Lock()
 
-def broadcast(message, sender_socket):
+def broadcast_to_room(room_id, message, sender_socket):
     with lock:
-        for client in clients[:]:
+        for client in rooms_clients[room_id][:]:
             if client is not sender_socket:
                 try:
                     client.sendall(message)
                 except:
-                    clients.remove(client)
+                    rooms_clients[room_id].remove(client)
                     client.close()
-
-def apply_shape(draw, shape, start, end, color, width):
-    x1, y1 = start
-    x2, y2 = end
-    bbox = [min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2)]
-
-    if shape == 1:  # Circle
-        draw.ellipse(bbox, outline=color, width=width)
-
-    elif shape == 2:  # Rectangle
-        draw.rectangle(bbox, outline=color, width=width)
-
-    elif shape == 3:  # Triangle
-        top = ((x1 + x2) // 2, min(y1, y2))
-        left = (min(x1, x2), max(y1, y2))
-        right = (max(x1, x2), max(y1, y2))
-        draw.polygon([top, left, right], outline=color, width=width)
-
-    elif shape == 4:  # Line
-        draw.line([start, end], fill=color, width=width)
 
 def apply_draw_packet_to_room(room, packet_bytes):
     try:
@@ -55,7 +37,8 @@ def apply_draw_packet_to_room(room, packet_bytes):
         color = packet["Color"]
         color_tuple = (color["R"], color["G"], color["B"], color["A"])
 
-        draw = rooms[room]["draw"]
+        canvas = rooms[room]["canvas"]
+        draw = aggdraw.Draw(canvas)
 
         for d in draw_data:
             event = d["Event"]
@@ -66,50 +49,86 @@ def apply_draw_packet_to_room(room, packet_bytes):
             prev = (d["prevPoint"]["X"], d["prevPoint"]["Y"])
             current = (d["Location"]["X"], d["Location"]["Y"])
 
+            brush = aggdraw.Brush(color_tuple)
+            pen = aggdraw.Pen(color_tuple, pen_width)
+
             if shape == 0:  # FreeDraw
                 if event == 1:  # DOWN
-                    draw.ellipse([
-                        (x - pen_width // 2, y - pen_width // 2),
-                        (x + pen_width // 2, y + pen_width // 2)
-                    ], fill=color_tuple)
-
+                    draw.ellipse(
+                        [x - pen_width // 2, y - pen_width // 2,
+                         x + pen_width // 2, y + pen_width // 2],
+                        brush
+                    )
                 elif event == 2:  # MOVE
-                    draw.line([prev, current], fill=color_tuple, width=pen_width)
-                    draw.ellipse([
-                        (x - pen_width // 2, y - pen_width // 2),
-                        (x + pen_width // 2, y + pen_width // 2)
-                    ], fill=color_tuple)
+                    draw.line([prev, current], pen)
+                    draw.ellipse(
+                        [x - pen_width // 2, y - pen_width // 2,
+                         x + pen_width // 2, y + pen_width // 2],
+                        brush
+                    )
 
-            elif event == 3:  # UP and shape != FreeDraw
-                apply_shape(draw, shape, prev, current, color_tuple, pen_width)
+            elif event == 3:  # UP with Shape
+                apply_shape_agg(draw, shape, prev, current, pen)
+
+        draw.flush()
 
     except Exception as e:
         print("Error rendering to room:", e)
 
-# def save_room_image_to_db(room_id, pil_image):
-#     import io, sqlite3
-#     buf = io.BytesIO()
-#     pil_image.save(buf, format="PNG")
-#     image_bytes = buf.getvalue()
+def apply_shape_agg(draw, shape, start, end, pen):
+    x1, y1 = start
+    x2, y2 = end
+    bbox = [min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2)]
 
-#     conn = sqlite3.connect("rooms.sql")
-#     c = conn.cursor()
-#     c.execute("REPLACE INTO room_snapshots (room_id, image) VALUES (?, ?)", (room_id, image_bytes))
-#     conn.commit()
-#     conn.close()
+    if shape == 1:  # Circle
+        draw.ellipse(bbox, pen)
+    elif shape == 2:  # Rectangle
+        draw.rectangle(bbox, pen)
+    elif shape == 3:  # Triangle
+        top = ((x1 + x2) // 2, min(y1, y2))
+        left = (min(x1, x2), max(y1, y2))
+        right = (max(x1, x2), max(y1, y2))
+        draw.polygon([top, left, right], pen)
+    elif shape == 4:  # Line
+        draw.line([start, end], pen)
 
-# def load_room_image_from_db(room_id):
-#     conn = sqlite3.connect("rooms.sql")
-#     c = conn.cursor()
-#     c.execute("SELECT image FROM room_snapshots WHERE room_id = ?", (room_id,))
-#     row = c.fetchone()
-#     conn.close()
+def save_room_image_to_db(room_id, pil_image):
+    import io, sqlite3
+    buf = io.BytesIO()
+    pil_image.save(buf, format="PNG")
+    image_bytes = buf.getvalue()
+    with lock:
+        conn = sqlite3.connect("rooms.sql")
+        c = conn.cursor()
+        c.execute("REPLACE INTO room_snapshots (room_id, image) VALUES (?, ?)", (room_id, image_bytes))
+        conn.commit()
+        conn.close()
 
-#     if row:
-#         return Image.open(io.BytesIO(row[0]))
-#     else:
-        # return None
-    
+def load_room_image_from_db(room_id):
+    with lock:
+        conn = sqlite3.connect("rooms.sql")
+        c = conn.cursor()
+        c.execute("SELECT image FROM room_snapshots WHERE room_id = ?", (room_id,))
+        row = c.fetchone()
+        conn.close()
+
+    if row:
+        return Image.open(io.BytesIO(row[0]))
+    else:
+        return None
+
+def send_canvas_to_client(client_socket, room_id):
+    try:
+        canvas = rooms[room_id]["canvas"]
+        buf = io.BytesIO()
+        canvas.save(buf, format="PNG")
+        img_bytes = buf.getvalue()
+        length_prefix = struct.pack('<I', len(img_bytes))
+        client_socket.sendall(length_prefix + img_bytes)
+        print(f"[+] Sent canvas snapshot of room {room_id} to client")
+    except Exception as e:
+        print(f"[!] Failed to send canvas: {e}")
+
 def save_img(room_id):
     rooms[room_id]["canvas"].save(f"room_{room_id}.png")
 
@@ -124,8 +143,8 @@ def handle_client(client_socket, addr):
         room_id = struct.unpack('<I', room_id)[0]
         print(f"Room ID: {room_id}")
         if room_id not in rooms:
-            # snapshot = load_room_image_from_db(room_id)
-            snapshot = None
+            snapshot = load_room_image_from_db(room_id)
+            
             if snapshot:
                 canvas = snapshot
             else:
@@ -136,9 +155,11 @@ def handle_client(client_socket, addr):
                 "draw": ImageDraw.Draw(canvas)
             }
 
-        clients.append(client_socket)
+        rooms_clients[room_id].append(client_socket)
+        send_canvas_to_client(client_socket, room_id)
 
     try:
+        count = 0
         while True:
             raw_len = client_socket.recv(4)
             if not raw_len:
@@ -158,18 +179,24 @@ def handle_client(client_socket, addr):
 
             full_message = raw_len + data
             apply_draw_packet_to_room(room_id, full_message)
-            broadcast(full_message, client_socket)
+            broadcast_to_room(room_id, full_message, client_socket)
+            count += 1
+            count %= 10
+            if not count:
+                save_room_image_to_db(room_id, rooms[room_id]["canvas"])
 
     except Exception as e:
         print(f"[!] Error with {addr}: {e}")
     finally:
         print(f"[-] Client {addr} disconnected")
         with lock:
-            if client_socket in clients:
-                clients.remove(client_socket)
+            if client_socket in rooms_clients[room_id]:
+                rooms_clients[room_id].remove(client_socket)
         client_socket.close()
         print(f"[-] Client {addr} removed from clients list of room {room_id}")
-        save_img(room_id)
+        save_room_image_to_db(room_id, rooms[room_id]["canvas"])
+        if not rooms_clients[room_id]:
+            rooms.pop(room_id, None)
 
 def start_server_listening():
     try:
@@ -189,8 +216,9 @@ def start_server_listening():
     finally:
         server_socket.close()
         with lock:
-            for c in clients:
-                c.close()
+            for clients in rooms_clients.values():
+                for c in clients:
+                    c.close()
 
 def start_server_status():
     try:
@@ -202,7 +230,8 @@ def start_server_status():
         while True:
             client_sock, addr = server_socket.accept()
             with lock:
-                client_sock.sendall(json.dumps({"load": len(clients)}).encode('utf-8'))
+                total_clients = sum(len(clients) for clients in rooms_clients.values())
+                client_sock.sendall(json.dumps({"load": total_clients}).encode('utf-8'))
             client_sock.close()
     except KeyboardInterrupt:
         print("\n[!] Server shutting down...")
@@ -213,7 +242,6 @@ def start_server_status():
 
 #IN_PORT for handle client connect
 #OUT_PORT for server load status
-
 if __name__ == "__main__":
     if len(sys.argv) != 4:
         print("Usage: python server.py <HOST> <IN_PORT> <OUT_PORT>")

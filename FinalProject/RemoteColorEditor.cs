@@ -206,7 +206,6 @@ namespace FinalProject
                     NetworkStream stream = client.GetStream();
                     byte[] lengthPrefix = BitConverter.GetBytes(room);
                     stream.Write(lengthPrefix, 0, lengthPrefix.Length);
-                    MessageBox.Show(lengthPrefix.Length.ToString() + "Byte send to connect to room" + room.ToString());
                     Task.Run(() => Client());
                     this.Hide();
                 }
