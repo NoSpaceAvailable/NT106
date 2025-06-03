@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw
 import aggdraw
 import io
 import json
-import sqlite3
+import psycopg2, time
 from collections import defaultdict
 
 rooms_clients = defaultdict(list)
@@ -14,10 +14,19 @@ rooms = {}
 
 HOST = '0.0.0.0'
 IN_PORT = 9999
-DB = "room.sql"
 width, height = 1545, 722
 
 lock = threading.Lock()
+
+time.sleep(1)  # Ensure the database is ready before connecting 
+
+conn = psycopg2.connect(
+    host="database",
+    port=5432,
+    dbname="rooms",
+    user="postgresql",
+    password="095f75fe10f6541b51d4a1ca84a993ac274ac14bee50a6c7a7df6c79cffd1946"
+)
 
 def broadcast_to_room(room_id, message, sender_socket):
     with lock:
@@ -74,7 +83,7 @@ def apply_draw_packet_to_room(room, packet_bytes):
         draw.flush()
 
     except Exception as e:
-        print("Error rendering to room:", e)
+        print("Error rendering to room:", e, flush=True)
 
 def apply_shape_agg(draw, shape, start, end, pen):
     x1, y1 = start
@@ -94,21 +103,25 @@ def apply_shape_agg(draw, shape, start, end, pen):
         draw.line([start, end], pen)
 
 def save_room_image_to_db(room_id, pil_image):
-    import io, sqlite3
     buf = io.BytesIO()
     pil_image.save(buf, format="PNG")
     image_bytes = buf.getvalue()
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-    c.execute("REPLACE INTO room_snapshots (room_id, image) VALUES (?, ?)", (room_id, image_bytes))
+
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO room_snapshots (room_id, image)
+        VALUES (%s, %s)
+        ON CONFLICT (room_id) DO UPDATE SET image = EXCLUDED.image
+    """, (room_id, psycopg2.Binary(image_bytes)))
     conn.commit()
+    cur.close()
     conn.close()
 
 def load_room_image_from_db(room_id):
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-    c.execute("SELECT image FROM room_snapshots WHERE room_id = ?", (room_id,))
-    row = c.fetchone()
+    cur = conn.cursor()
+    cur.execute("SELECT image FROM room_snapshots WHERE room_id = %s", (room_id,))
+    row = cur.fetchone()
+    cur.close()
     conn.close()
 
     if row:
@@ -118,30 +131,30 @@ def load_room_image_from_db(room_id):
 
 def send_canvas_to_client(client_socket, room_id):
     try:
-        print(f"[+] Trying sent canvas snapshot of room {room_id} to client")
+        print(f"[+] Trying sent canvas snapshot of room {room_id} to client", flush=True)
         canvas = rooms[room_id]["canvas"]
         buf = io.BytesIO()
         canvas.save(buf, format="PNG")
         img_bytes = buf.getvalue()
         length_prefix = struct.pack('<I', len(img_bytes))
         client_socket.sendall(length_prefix + img_bytes)
-        print(f"[+] Sent canvas snapshot of room {room_id} to client")
+        print(f"[+] Sent canvas snapshot of room {room_id} to client", flush=True)
     except Exception as e:
-        print(f"[!] Failed to send canvas: {e}")
+        print(f"[!] Failed to send canvas: {e}", flush=True)
 
 def save_img(room_id):
     rooms[room_id]["canvas"].save(f"room_{room_id}.png")
 
 def handle_client(client_socket, addr):
-    print(f"[+] New connection from {addr}")
+    print(f"[+] New connection from {addr}", flush=True)
     with lock:
         room_id = client_socket.recv(4)
         if not room_id:
-            print(f"[-] No room ID received from {addr}")
+            print(f"[-] No room ID received from {addr}", flush=True)
             client_socket.close()
             return
         room_id = struct.unpack('<I', room_id)[0]
-        print(f"Room ID: {room_id}")
+        print(f"Room ID: {room_id}", flush=True)
         if room_id not in rooms:
             snapshot = load_room_image_from_db(room_id)
             
@@ -155,7 +168,7 @@ def handle_client(client_socket, addr):
                 "draw": ImageDraw.Draw(canvas)
             }
 
-        print(f"[+] Client {addr} connected to room {room_id}")
+        print(f"[+] Client {addr} connected to room {room_id}", flush=True)
         rooms_clients[room_id].append(client_socket)
         save_room_image_to_db(room_id, rooms[room_id]["canvas"])
         send_canvas_to_client(client_socket, room_id)
@@ -184,14 +197,14 @@ def handle_client(client_socket, addr):
             broadcast_to_room(room_id, full_message, client_socket)
 
     except Exception as e:
-        print(f"[!] Error with {addr}: {e}")
+        print(f"[!] Error with {addr}: {e}", flush=True)
     finally:
-        print(f"[-] Client {addr} disconnected")
+        print(f"[-] Client {addr} disconnected", flush=True)
         with lock:
             if client_socket in rooms_clients[room_id]:
                 rooms_clients[room_id].remove(client_socket)
         client_socket.close()
-        print(f"[-] Client {addr} removed from clients list of room {room_id}")
+        print(f"[-] Client {addr} removed from clients list of room {room_id}", flush=True)
         save_room_image_to_db(room_id, rooms[room_id]["canvas"])
         if not rooms_clients[room_id]:
             rooms.pop(room_id, None)
@@ -202,15 +215,15 @@ def start_server_listening():
         server_socket.bind((HOST, IN_PORT))
         server_socket.listen()
 
-        print(f"[*] Server listening client on {HOST}:{IN_PORT}")
+        print(f"[*] Server listening client on {HOST}:{IN_PORT}", flush=True)
         while True:
             client_sock, addr = server_socket.accept()
             thread = threading.Thread(target=handle_client, args=(client_sock, addr), daemon=True)
             thread.start()
     except KeyboardInterrupt:
-        print("\n[!] Server shutting down...")
+        print("\n[!] Server shutting down...", flush=True)
     except Exception as e:
-        print(f"[!] Error: {e}")
+        print(f"[!] Error: {e}", flush=True)
     finally:
         server_socket.close()
         with lock:
@@ -224,7 +237,7 @@ def start_server_status():
         server_socket.bind((HOST, OUT_PORT))
         server_socket.listen()
 
-        print(f"[*] Server listening for load status on {HOST}:{OUT_PORT}")
+        print(f"[*] Server listening for load status on {HOST}:{OUT_PORT}", flush=True)
         while True:
             client_sock, addr = server_socket.accept()
             with lock:
@@ -232,9 +245,9 @@ def start_server_status():
                 client_sock.sendall(json.dumps({"load": total_clients}).encode('utf-8'))
             client_sock.close()
     except KeyboardInterrupt:
-        print("\n[!] Server shutting down...")
+        print("\n[!] Server shutting down...", flush=True)
     except Exception as e:
-        print(f"[!] Error: {e}")
+        print(f"[!] Error: {e}", flush=True)
     finally:
         server_socket.close()
 
@@ -242,12 +255,12 @@ def start_server_status():
 #OUT_PORT for server load status
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        print("Usage: python server.py <HOST> <IN_PORT> <OUT_PORT>")
+        print("Usage: python server.py <HOST> <IN_PORT> <OUT_PORT>", flush=True)
         exit()
     HOST = sys.argv[1]
     IN_PORT = int(sys.argv[2])
     OUT_PORT = int(sys.argv[3])
-    print(f"[*] Starting server on {HOST}:{IN_PORT}\n[*] Get server load status through {HOST}:{OUT_PORT}")
+    print(f"[*] Starting server on {HOST}:{IN_PORT}\n[*] Get server load status through {HOST}:{OUT_PORT}", flush=True)
     listening = threading.Thread(target=start_server_listening, args = (), daemon = True)
     listening.start()
     speaking = threading.Thread(target=start_server_status, args = (), daemon = True)

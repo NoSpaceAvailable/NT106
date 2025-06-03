@@ -1,8 +1,0 @@
-[
-  { "host": "loadsv", "port": 7000 },
-  { "host": "server0", "in_port": 8000, "out_port": 9000 },
-  { "host": "server1", "in_port": 8001, "out_port": 9001 },
-  { "host": "server2", "in_port": 8002, "out_port": 9002 },
-  { "host": "server3", "in_port": 8003, "out_port": 9003 },
-  { "host": "server4", "in_port": 8004, "out_port": 9004 }
-]

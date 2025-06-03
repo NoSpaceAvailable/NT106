@@ -1,0 +1,102 @@
+version: '3.8'
+services:
+  # loadbalancer:
+  #   build:
+  #     context: server_handler
+  #     dockerfile: Dockerfile.loadserver
+  #   ports:
+  #     - "7000:7000"
+  #   environment:
+  #     - HOST=loadsv
+  #     - PORT=7000
+  #   depends_on:
+  #     - server0
+  #     - server1
+  #     - server2
+  #     - server3
+  #     - server4
+  #   networks:
+  #     - drawnet
+
+  server0:
+    build:
+      context: server_handler
+      dockerfile: Dockerfile.server
+    ports:
+      - '2001:2001'
+      - '3001:3001'
+    environment:
+      - IN_PORT=2001
+      - OUT_PORT=3001
+    networks:
+      - drawnet
+
+  server1:
+    build:
+      context: server_handler
+      dockerfile: Dockerfile.server
+    ports:
+      - '2002:2002'
+      - '3002:3002'
+    environment:
+      - IN_PORT=2002
+      - OUT_PORT=3002
+    networks:
+      - drawnet
+
+  server2:
+    build:
+      context: server_handler
+      dockerfile: Dockerfile.server
+    ports:
+      - '2003:2003'
+      - '3003:3003'
+    environment:
+      - IN_PORT=2003
+      - OUT_PORT=3003
+    networks:
+      - drawnet
+
+  server3:
+    build:
+      context: server_handler
+      dockerfile: Dockerfile.server
+    ports:
+      - '2004:2004'
+      - '3004:3004'
+    environment:
+      - IN_PORT=2004
+      - OUT_PORT=3004
+    networks:
+      - drawnet
+
+  server4:
+    build:
+      context: server_handler
+      dockerfile: Dockerfile.server
+    ports:
+      - '2005:2005'
+      - '3005:3005'
+    environment:
+      - IN_PORT=2005
+      - OUT_PORT=3005
+    networks:
+      - drawnet
+  
+  database:
+    build: ./postgresql
+    ports:
+      - '5432'
+    environment:
+      - POSTGRES_USER=postgresql
+      - POSTGRES_HOST=localhost
+      - POSTGRES_PASSWORD=095f75fe10f6541b51d4a1ca84a993ac274ac14bee50a6c7a7df6c79cffd1946
+      - POSTGRES_DB=rooms
+    volumes:
+      - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    networks:
+      - drawnet
+
+networks:
+  drawnet:
