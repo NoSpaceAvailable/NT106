@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -664,18 +665,27 @@ namespace FinalProject
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (String.IsNullOrEmpty(IPAddressTextBox.Text) || String.IsNullOrEmpty(PortTextBox.Text))
+            if (String.IsNullOrEmpty(IPAddressTextBox.Text.Trim()) || String.IsNullOrEmpty(PortTextBox.Text.Trim()))
             {
                 MessageBox.Show("Please enter IP address and port number.");
                 return;
             }
             int port;
-            if (!int.TryParse(PortTextBox.Text, out port) || port <= 0 || port > 65535)
+            if (!int.TryParse(PortTextBox.Text.Trim(), out port) || port <= 0 || port > 65535)
             {
                 MessageBox.Show("Invalid port number. Please enter a valid port (1-65535).");
                 return;
             }
-            Authentication authentication = new Authentication(IPAddressTextBox.Text);
+            try
+            {
+                IPAddress.Parse(IPAddressTextBox.Text.Trim());
+            }
+            catch
+            {
+                MessageBox.Show("Invalid ip address. Please enter a valid ip address");
+                return;
+            }
+            Authentication authentication = new Authentication(IPAddressTextBox.Text.Trim());
             authentication.ShowDialog();
             if (authentication.AuthResult)
             {
@@ -690,7 +700,7 @@ namespace FinalProject
 
         private void OpenChatBtn_Click(object sender, EventArgs e)
         {
-            if (room_id == -1)
+            if (room_id <= 0)
             {
                 MessageBox.Show("RCE please!");
                 return;

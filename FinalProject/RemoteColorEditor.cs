@@ -34,7 +34,6 @@ namespace FinalProject
         }
 
         private TcpClient client = null;
-        private TcpListener listener = null;
 
         private void Client()
         {
@@ -168,6 +167,7 @@ namespace FinalProject
             if (int.TryParse(RoomTextBox.Text.Trim(), out room) == false || room == 0)
             {
                 MessageBox.Show("Invalid room id");
+                return;
             }
 
             try
@@ -177,13 +177,14 @@ namespace FinalProject
             catch (Exception ex)
             {
                 MessageBox.Show($"Error connecting to server: {ex.Message}");
+                client = null;
             }
-            this.room_id = room;
+            
         }
 
         private void DisconnectBtn_Click(object sender, EventArgs e)
         {
-            if (listener == null && client == null)
+            if (client == null)
             {
                 MessageBox.Show("No connection");
             }
@@ -191,16 +192,15 @@ namespace FinalProject
             {
                 try
                 {
-                    if (listener != null)
-                        listener.Stop();
                     if (client != null)
                         client.Close();
-                    listener = null;
                     client = null;
-                }
-                catch
-                {
                     MessageBox.Show("Disconnected");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error disconnecting to server: {ex.Message}");
+                    client = null;
                 }
             }
         }
@@ -209,7 +209,7 @@ namespace FinalProject
         {
             try
             {
-                if (client == null && listener == null)
+                if (client == null)
                 {
                     client = new TcpClient(ipAddress, port);
                     MessageBox.Show("Connected to server");
@@ -217,6 +217,7 @@ namespace FinalProject
                     byte[] lengthPrefix = BitConverter.GetBytes(room);
                     stream.Write(lengthPrefix, 0, lengthPrefix.Length);
                     Task.Run(() => Client());
+                    this.room_id = room;
                     this.Hide();
                 }
                 else if (client != null)
@@ -228,6 +229,7 @@ namespace FinalProject
             catch
             {
                 MessageBox.Show("Cannot connect to server");
+                client = null;
             }
 
         }
