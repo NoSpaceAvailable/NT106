@@ -1,33 +1,34 @@
-﻿    using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+﻿using System;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.Remoting.Channels;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text.Json;
 using static FinalProject.MainForm;
-using System.Net.Http;
 
 namespace FinalProject
 {
 
-    public partial class RemoteColorEditor: Form
+    public partial class RemoteColorEditor : Form
     {
         private MainForm mainForm;
+        private String remote_addr;
+        private String remote_port;
+
+        public int room_id;
+
         public RemoteColorEditor()
         {
             InitializeComponent();
         }
 
-        public RemoteColorEditor(MainForm form)
+        public RemoteColorEditor(MainForm form, String ip, String port)
         {
+            this.remote_addr = ip;
+            this.remote_port = port;
             InitializeComponent();
             mainForm = form;
         }
@@ -135,7 +136,7 @@ namespace FinalProject
                     read += stream.Read(buffer, read, length - read);
                 return buffer;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show($"Error receiving data: {ex.Message}");
                 tcp.Close();
@@ -145,13 +146,12 @@ namespace FinalProject
 
         private void ConnectBtn_Click(object sender, EventArgs e)
         {
-            string ipAddr = IPTextBox.Text.Trim();
             int port = 0;
             int room = 0;
 
             try
             {
-                IPAddress.Parse(IPTextBox.Text.Trim());
+                IPAddress.Parse(this.remote_addr);
             }
             catch
             {
@@ -159,7 +159,7 @@ namespace FinalProject
                 return;
             }
 
-            if (int.TryParse(PortTextBox.Text.Trim(), out port) == false)
+            if (int.TryParse(this.remote_port, out port) == false)
             {
                 MessageBox.Show("Invalid port");
                 return;
@@ -172,12 +172,13 @@ namespace FinalProject
 
             try
             {
-                ConnectToServer(ipAddr, port, room);
+                ConnectToServer(this.remote_addr, port, room);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error connecting to server: {ex.Message}");
             }
+            this.room_id = room;
         }
 
         private void DisconnectBtn_Click(object sender, EventArgs e)
