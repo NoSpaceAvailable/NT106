@@ -1,1 +1,4 @@
 *.db
+/FinalProject/.vs
+/FinalProject/bin
+/FinalProject/obj
