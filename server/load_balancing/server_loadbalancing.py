@@ -18,6 +18,12 @@ DRAW_ALREADY_CONNECT = b'\x02'  # Later package from client to draw server must 
 DRAW_CHANGE_SERVER = b'\x03'    # When a server dead, send a package DRAW_CHANGE_SERVER to draw server     
                                 # The package must follow this format: DRAW_CHANGE_SERVER byte | room_id 4 byte    
 
+CONNECTED_IP = {}
+
+ROOMS = {}
+
+CHANGE_SERVER = {}
+
 round_robin_index = 0
 health_lock = threading.Lock()  # Lock for SERVER_HEALTH
 selection_lock = threading.Lock()  # Lock for server selection and round_robin_index
@@ -100,7 +106,15 @@ def forward_data(source_sock, dest_sock, direction, stop_event):
                 continue
 
             if is_client_to_server:
+                if CHANGE_SERVER.get(source_sock.getpeername(), 0):
+                    data_to_send = DRAW_CHANGE_SERVER + struct.pack('<I', ROOMS[source_sock.getpeername()])
+                    dest_sock.sendall(data_to_send)
+                    del CHANGE_SERVER[source_sock.getpeername()]
+                    continue
+
                 raw_room_id = source_sock.recv(4)
+                data_to_send = DRAW_FIRST_CONNECT if not CONNECTED_IP.get(source_sock.getpeername(), 0) else DRAW_ALREADY_CONNECT
+                
                 if len(raw_room_id) < 4:
                     if raw_room_id:
                         print(f"[DEBUG] Partial room ID ({len(raw_room_id)} bytes) from {direction}, signaling stop", flush=True)
@@ -110,9 +124,10 @@ def forward_data(source_sock, dest_sock, direction, stop_event):
                     break
 
                 print(f"[DEBUG] Received room ID {raw_room_id.hex()} from {direction}", flush=True)
-                dest_sock.sendall(raw_room_id)
+                data_to_send += raw_room_id
                 room_id = struct.unpack('<I', raw_room_id)[0]
                 print(f"[DEBUG] Room ID: {room_id} from {direction}", flush=True)
+                ROOMS[source_sock.getpeername()] = room_id
 
                 raw_len = source_sock.recv(4)
                 if len(raw_len) < 4:
@@ -121,7 +136,7 @@ def forward_data(source_sock, dest_sock, direction, stop_event):
                     break
 
                 print(f"[DEBUG] Received length prefix {raw_len.hex()} from {direction}", flush=True)
-                dest_sock.sendall(raw_len)
+                data_to_send += raw_len
                 msg_len = struct.unpack('<I', raw_len)[0]
                 print(f"[DEBUG] Message length: {msg_len} bytes from {direction}", flush=True)
 
@@ -132,7 +147,9 @@ def forward_data(source_sock, dest_sock, direction, stop_event):
                     break
 
                 print(f"[DEBUG] Forwarding {len(data)} bytes payload from {direction}: {data[:50].hex()}...", flush=True)
-                dest_sock.sendall(data)
+                data_to_send += data
+                dest_sock.sendall(data_to_send)
+                CONNECTED_IP[source_sock.getpeername()] = 1
             else:
                 buffer = b""
                 source_sock.setblocking(False)
@@ -175,7 +192,7 @@ def handle_client(client_sock, addr):
             print("[-] No available servers.", flush=True)
             if retry_count < max_retries - 1:
                 print(f"[*] Retrying to find server (attempt {retry_count + 1}/{max_retries})")
-                time.sleep(2)  # Wait before retrying
+                time.sleep(2)
                 retry_count += 1
                 continue
             client_sock.close()
@@ -184,6 +201,14 @@ def handle_client(client_sock, addr):
         try:
             server_sock = socket.create_connection((best_server["host"], best_server["in_port"]), timeout=10)
             server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+            if addr not in CONNECTED_IP:
+                CONNECTED_IP[addr] = 0
+                print(f"[+] New client connected: {addr}", flush=True)
+            
+            if addr in ROOMS:
+                CHANGE_SERVER[addr] = 1
+                print(f"[+] Change {addr} to server {best_server['host']}:{best_server['in_port']} for client {addr}", flush=True)
+
             print(f"[+] Connected to server {best_server['host']}:{best_server['in_port']} for client {addr}", flush=True)
 
             stop_event = threading.Event()
@@ -229,6 +254,8 @@ def handle_client(client_sock, addr):
     print(f"[!] Error handling client {addr}: Max retries exceeded", flush=True)
     try:
         client_sock.close()
+        del CONNECTED_IP[addr]
+        del ROOMS[addr]
     except:
         pass
     if server_sock:

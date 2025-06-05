@@ -144,14 +144,12 @@ def save_room_image_to_db(room_id, pil_image):
     """, (room_id, psycopg2.Binary(image_bytes)))
     conn.commit()
     cur.close()
-    conn.close()
 
 def load_room_image_from_db(room_id):
     cur = conn.cursor()
     cur.execute("SELECT image FROM room_snapshots WHERE room_id = %s", (room_id,))
     row = cur.fetchone()
     cur.close()
-    conn.close()
 
     if row:
         return Image.open(io.BytesIO(row[0]))
