@@ -1,4 +1,4 @@
-﻿using System;
+    using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -11,10 +11,13 @@ namespace FinalProject
     public partial class Authentication : Form
     {
         private String IPAddr = "127.0.0.1";
-        private readonly int Port = 9999;    // this will be fixed
+        private readonly int Port = 10000;    // this will be fixed
         private char delimiter = '|';
 
-        public bool AuthResult = false; 
+        private int BUFF_SIZE = 256; // bytes
+
+        private String JWTtoken = String.Empty;
+        private String username = String.Empty;
 
         enum Action
         {
@@ -44,6 +47,20 @@ namespace FinalProject
             this.IPAddr = ipAddr;
         }
 
+        public Object GetJWTToken()
+        {
+            if (this.JWTtoken == String.Empty)
+            {
+                return null;
+            }
+            return this.JWTtoken;
+        }
+
+        public String GetUsername()
+        {
+            return this.username;
+        }
+
         private bool sanitize(String username, String password)
         {
             if (String.IsNullOrEmpty(username) || String.IsNullOrEmpty(password))
@@ -64,6 +81,7 @@ namespace FinalProject
                 ErrorTextLabel.Visible = true;
                 return false;
             }
+            this.username = username;
             return true;
         }
 
@@ -78,7 +96,7 @@ namespace FinalProject
                 byte[] sendBuffer = Encoding.UTF8.GetBytes(dataToSend);
                 stream.Write(sendBuffer, 0, sendBuffer.Length);
 
-                byte[] reveiceBuffer = new byte[256];
+                byte[] reveiceBuffer = new byte[BUFF_SIZE];
                 int bytesRead = stream.Read(reveiceBuffer, 0, reveiceBuffer.Length);
                 String data = Encoding.UTF8.GetString(reveiceBuffer, 0, bytesRead);
                 stream.Close();
@@ -87,7 +105,7 @@ namespace FinalProject
                 int status = int.Parse(splitted[0]);
                 if (status == (int)AuthStatus.AuthenticationSuccessful)
                 {
-                    this.AuthResult = true;
+                    this.JWTtoken = splitted[1];
                 }
                 return status;
             }

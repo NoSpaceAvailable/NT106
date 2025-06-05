@@ -35,6 +35,7 @@ namespace FinalProject
         // authentication area
         private bool isAuthenticated = false;
         private String username = null;
+        private String authToken = null;
 
         // data for chat handler
         private int room_id = -1;
@@ -687,10 +688,13 @@ namespace FinalProject
             }
             Authentication authentication = new Authentication(IPAddressTextBox.Text.Trim());
             authentication.ShowDialog();
-            if (authentication.AuthResult)
+            Object token = authentication.GetJWTToken();
+            if (token != null)
             {
-                MessageBox.Show("Authentication successful!");
+                MessageBox.Show($"Authentication successful! {token}");
                 this.isAuthenticated = true;
+                this.authToken = (String)token;
+                this.username = authentication.GetUsername();
             } else
             {
                 MessageBox.Show("Authentication failed! Please try again.");
@@ -705,7 +709,7 @@ namespace FinalProject
                 MessageBox.Show("RCE please!");
                 return;
             }
-            ChatForm chat = new ChatForm();
+            ChatForm chat = new ChatForm(this.username, this.authToken, IPAddressTextBox.Text);
             chat.Show();
         }
     }

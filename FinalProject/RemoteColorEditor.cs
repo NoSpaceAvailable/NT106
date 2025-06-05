@@ -117,6 +117,7 @@ namespace FinalProject
             {
                 MessageBox.Show("Error receiving data from server. Please check your connection.");
                 tcp.Close();
+                MessageBox.Show("Error receiving data from server. Please check your connection.");
                 return null;
             }
         }
