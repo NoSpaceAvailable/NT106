@@ -17,7 +17,8 @@ namespace FinalProject
         private MainForm mainForm;
         private String remote_addr;
         private String remote_port;
-        private int room_id;
+
+        public int room_id;
 
         public RemoteColorEditor()
         {
@@ -177,6 +178,7 @@ namespace FinalProject
             {
                 MessageBox.Show($"Error connecting to server: {ex.Message}");
             }
+            this.room_id = room;
         }
 
         private void DisconnectBtn_Click(object sender, EventArgs e)

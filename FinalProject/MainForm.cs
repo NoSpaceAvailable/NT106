@@ -613,7 +613,8 @@ namespace FinalProject
             }
             if (remotecoloreditor == null || remotecoloreditor.IsDisposed)
                 remotecoloreditor = new RemoteColorEditor(this, IPAddressTextBox.Text, PortTextBox.Text);
-            remotecoloreditor.Show();
+            remotecoloreditor.ShowDialog();
+            this.room_id = remotecoloreditor.room_id;
         }
 
         public void cleanGraphics()
