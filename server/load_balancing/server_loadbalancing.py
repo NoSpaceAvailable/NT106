@@ -157,45 +157,79 @@ def forward_data(source_sock, dest_sock, direction, stop_event):
 
 def handle_client(client_sock, addr):
     print(f"[+] Client {addr} connected to Load Balancer", flush=True)
-    best_server = choose_best_server()
-    if best_server is None:
-        print("[-] No available servers.", flush=True)
-        client_sock.close()
-        return
-
+    
+    max_retries = 3
+    retry_count = 0
     server_sock = None
-    try:
-        server_sock = socket.create_connection((best_server["host"], best_server["in_port"]), timeout=10)
-        server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-        print(f"[+] Connected to server {best_server['host']}:{best_server['in_port']} for client {addr}", flush=True)
-
-        stop_event = threading.Event()
-
-        client_to_server = threading.Thread(
-            target=forward_data, args=(client_sock, server_sock, f"client {addr} to server", stop_event), daemon=True
-        )
-        server_to_client = threading.Thread(
-            target=forward_data, args=(server_sock, client_sock, f"server to client {addr}", stop_event), daemon=True
-        )
-        client_to_server.start()
-        server_to_client.start()
-
-        client_to_server.join()
-        server_to_client.join()
-
-    except Exception as e:
-        print(f"[!] Error handling client {addr}: {e}", flush=True)
-    finally:
-        try:
+    
+    while retry_count < max_retries:
+        best_server = choose_best_server()
+        if best_server is None:
+            print("[-] No available servers.", flush=True)
+            if retry_count < max_retries - 1:
+                print(f"[*] Retrying to find server (attempt {retry_count + 1}/{max_retries})")
+                time.sleep(2)  # Wait before retrying
+                retry_count += 1
+                continue
             client_sock.close()
+            return
+
+        try:
+            server_sock = socket.create_connection((best_server["host"], best_server["in_port"]), timeout=10)
+            server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+            print(f"[+] Connected to server {best_server['host']}:{best_server['in_port']} for client {addr}", flush=True)
+
+            stop_event = threading.Event()
+
+            client_to_server = threading.Thread(
+                target=forward_data, args=(client_sock, server_sock, f"client {addr} to server", stop_event), daemon=True
+            )
+            server_to_client = threading.Thread(
+                target=forward_data, args=(server_sock, client_sock, f"server to client {addr}", stop_event), daemon=True
+            )
+            client_to_server.start()
+            server_to_client.start()
+
+            # Monitor the connection
+            while not stop_event.is_set():
+                client_to_server.join(timeout=1.0)
+                server_to_client.join(timeout=1.0)
+                
+                # Check if server is still healthy
+                if not check_health(best_server):
+                    print(f"[!] Server {best_server['host']}:{best_server['in_port']} became unhealthy")
+                    stop_event.set()
+                    break
+                    
+                if not (client_to_server.is_alive() and server_to_client.is_alive()):
+                    break
+                    
+            if not stop_event.is_set():
+                return
+                
+            print(f"[!] Connection to server lost, attempting to reconnect (attempt {retry_count + 1}/{max_retries})")
+            retry_count += 1
+            
+        except Exception as e:
+            print(f"[!] Connection error: {e}")
+            if retry_count < max_retries - 1:
+                print(f"[*] Retrying connection (attempt {retry_count + 1}/{max_retries})")
+                retry_count += 1
+                time.sleep(2)
+                continue
+            break
+
+    print(f"[!] Error handling client {addr}: Max retries exceeded", flush=True)
+    try:
+        client_sock.close()
+    except:
+        pass
+    if server_sock:
+        try:
+            server_sock.close()
         except:
             pass
-        if server_sock:
-            try:
-                server_sock.close()
-            except:
-                pass
-        print(f"[-] Client {addr} connection closed.", flush=True)
+    print(f"[-] Client {addr} connection closed.", flush=True)
 
 def start_load_balancer():
     health_thread = threading.Thread(target=background_health_check, daemon=True)
