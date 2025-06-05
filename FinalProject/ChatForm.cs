@@ -2,15 +2,71 @@
 using System.IO;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Net.Sockets;
+using System.Text;
 
 namespace FinalProject
 {
     public partial class ChatForm : Form
     {
-        //private String username = "admin";
+        private String AuthToken = String.Empty;
+        private String RemoteHost = "127.0.0.1";
+        private readonly int RemotePort = 10001;
+        private readonly int BUFF_SIZE = 256; // bytes
+
+        private char delimiter = '|';
+        private String username = String.Empty;
         public ChatForm()
         {
             InitializeComponent();
+            CheckAuth();
+        }
+
+        public ChatForm(String username, String token, String remoteHost)
+        {
+            InitializeComponent();
+            this.username = username;
+            this.AuthToken = token;
+            this.RemoteHost = remoteHost;
+            CheckAuth();
+        }
+
+        private void CheckAuth()
+        {
+            if (string.IsNullOrEmpty(AuthToken))
+            {
+                MessageBox.Show("You are not authenticated. Please log in first.");
+                this.Close(); // Close the chat form if not authenticated
+                return;
+            } else
+            {
+                TcpClient authClient = new TcpClient();
+                authClient.Connect(this.RemoteHost, this.RemotePort);
+
+                NetworkStream stream = authClient.GetStream();
+                byte[] jwtBytesArray = Encoding.UTF8.GetBytes($"{this.username}{this.delimiter}{this.AuthToken}");
+                MessageBox.Show($"{this.username}{this.delimiter}{this.AuthToken}");
+                stream.Write(jwtBytesArray, 0, jwtBytesArray.Length);
+
+                byte[] response = new byte[BUFF_SIZE];
+                stream.Read(response, 0, response.Length);
+                String data = Encoding.UTF8.GetString(response);
+                String[] splitted = data.Split(delimiter);
+                if (splitted[0].Trim('\0') == "0")
+                {
+                    // this mean the token is valid
+                } 
+                else
+                {
+                    MessageBox.Show("Nahhhhhhh");
+                    this.Close();
+                }
+            }
+        }
+
+        private void SendMessageToServer(String message)
+        {
+
         }
 
         private String GetCurrentTime()

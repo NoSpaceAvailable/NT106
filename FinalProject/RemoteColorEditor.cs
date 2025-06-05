@@ -53,6 +53,7 @@ namespace FinalProject
             {
                 if (client != null)
                     client.Close();
+                MessageBox.Show("Connection lost or error occurred while receiving data.");
                 client = null;
             }
         }
@@ -92,6 +93,7 @@ namespace FinalProject
             catch
             {
                 client.Close();
+                MessageBox.Show("Error sending data to server. Please check your connection.");
                 client = null;
             }
             return;
@@ -118,6 +120,7 @@ namespace FinalProject
             catch
             {
                 tcp.Close();
+                MessageBox.Show("Error receiving data from server. Please check your connection.");
                 return null;
             }
         }

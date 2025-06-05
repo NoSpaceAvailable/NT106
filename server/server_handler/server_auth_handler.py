@@ -4,13 +4,15 @@ from hashlib import md5
 import threading
 
 HOST = '0.0.0.0'
-PORT = 9999
+PORT = 10000
 lock = threading.Lock()
 
 db = 'users.db'
+secret = b'0b6825b36ec7459e37d7e463a19daa44a9b5cc63dd98146fccb525552dd086ca'
 
 Login = '0'
 Register = '1'
+Verify = '2'
 
 Success = '0'
 AuthenticationSuccessful = '1'
@@ -20,8 +22,14 @@ NetworkError = '4'
 BadRequest = '5'
 UnexpectedError = '6'
 
-
 delimiter = '|'
+
+
+PACK_SIZE = 256
+
+
+def sign_token(username: str):
+    return md5(username.encode() + secret).hexdigest()
 
 
 def get_conn():
@@ -81,7 +89,7 @@ def register(username, password):
 def handle_client(client_socket, client_address):
     try:
         print(f"[+] Accepted connection from {client_address}")
-        data = client_socket.recv(128)
+        data = client_socket.recv(PACK_SIZE)
         print(f"[+] Received: {data.decode()}")
 
         data = data.decode().split(delimiter)
@@ -93,7 +101,7 @@ def handle_client(client_socket, client_address):
                 password = data[2]
                 status = login(username, password)
                 if status:
-                    response = f'{AuthenticationSuccessful}{delimiter}authenticated'
+                    response = f'{AuthenticationSuccessful}{delimiter}{sign_token(username)}'
                 else:
                     response = f'{InvalidCredentials}'
             elif data[0] == Register:
@@ -104,6 +112,13 @@ def handle_client(client_socket, client_address):
                     response = f'{Success}'
                 else:
                     response = f'{UserAlreadyExists}'
+            elif data[0] == Verify:
+                username = data[1]
+                token = data[2]
+                if sign_token(username) == token:
+                    response = f'{Success}'
+                else:
+                    response = f'{InvalidCredentials}'
             else:
                 response = f'{BadRequest}'
 
