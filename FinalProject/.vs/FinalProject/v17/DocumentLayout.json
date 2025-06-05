@@ -1,17 +1,25 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\CourseUIT\\LapTrinhMangCanBan\\test\\NT106\\FinalProject\\",
+  "WorkspaceRootPath": "C:\\One_For_All\\Reporting\\NT106\\FinalProject\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|D:\\CourseUIT\\LapTrinhMangCanBan\\test\\NT106\\FinalProject\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|c:\\one_for_all\\reporting\\nt106\\finalproject\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|solutionrelative:mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|d:\\courseuit\\laptrinhmangcanban\\test\\nt106\\finalproject\\remotecoloreditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|c:\\one_for_all\\reporting\\nt106\\finalproject\\authentication.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|solutionrelative:authentication.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|c:\\one_for_all\\reporting\\nt106\\finalproject\\remotecoloreditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|solutionrelative:remotecoloreditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|C:\\One_For_All\\Reporting\\NT106\\FinalProject\\remotecoloreditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|solutionrelative:remotecoloreditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|d:\\courseuit\\laptrinhmangcanban\\test\\nt106\\finalproject\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|C:\\One_For_All\\Reporting\\NT106\\FinalProject\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|solutionrelative:mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -22,30 +30,41 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "MainForm.cs",
-              "DocumentMoniker": "D:\\CourseUIT\\LapTrinhMangCanBan\\test\\NT106\\FinalProject\\MainForm.cs",
-              "RelativeDocumentMoniker": "MainForm.cs",
-              "ToolTip": "D:\\CourseUIT\\LapTrinhMangCanBan\\test\\NT106\\FinalProject\\MainForm.cs",
-              "RelativeToolTip": "MainForm.cs",
-              "ViewState": "AgIAAF4AAAAAAAAAAAA/wHUAAAAfAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "Authentication.cs [Design]",
+              "DocumentMoniker": "C:\\One_For_All\\Reporting\\NT106\\FinalProject\\Authentication.cs",
+              "RelativeDocumentMoniker": "Authentication.cs",
+              "ToolTip": "C:\\One_For_All\\Reporting\\NT106\\FinalProject\\Authentication.cs [Design]",
+              "RelativeToolTip": "Authentication.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-05T03:33:58.323Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-05T04:04:07.724Z",
+              "EditorCaption": " [Design]"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "RemoteColorEditor.cs",
-              "DocumentMoniker": "D:\\CourseUIT\\LapTrinhMangCanBan\\test\\NT106\\FinalProject\\RemoteColorEditor.cs",
+              "DocumentIndex": 2,
+              "Title": "RemoteColorEditor.cs [Design]",
+              "DocumentMoniker": "C:\\One_For_All\\Reporting\\NT106\\FinalProject\\RemoteColorEditor.cs",
               "RelativeDocumentMoniker": "RemoteColorEditor.cs",
-              "ToolTip": "D:\\CourseUIT\\LapTrinhMangCanBan\\test\\NT106\\FinalProject\\RemoteColorEditor.cs",
+              "ToolTip": "C:\\One_For_All\\Reporting\\NT106\\FinalProject\\RemoteColorEditor.cs [Design]",
+              "RelativeToolTip": "RemoteColorEditor.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-05T04:04:03.151Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "RemoteColorEditor.cs",
+              "DocumentMoniker": "C:\\One_For_All\\Reporting\\NT106\\FinalProject\\RemoteColorEditor.cs",
+              "RelativeDocumentMoniker": "RemoteColorEditor.cs",
+              "ToolTip": "C:\\One_For_All\\Reporting\\NT106\\FinalProject\\RemoteColorEditor.cs",
               "RelativeToolTip": "RemoteColorEditor.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAjAAAAAAAAAA==",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAuwBMAAAAUAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-04T16:10:02.548Z",
               "EditorCaption": ""
@@ -54,13 +73,26 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "MainForm.cs [Design]",
-              "DocumentMoniker": "D:\\CourseUIT\\LapTrinhMangCanBan\\test\\NT106\\FinalProject\\MainForm.cs",
+              "DocumentMoniker": "C:\\One_For_All\\Reporting\\NT106\\FinalProject\\MainForm.cs",
               "RelativeDocumentMoniker": "MainForm.cs",
-              "ToolTip": "D:\\CourseUIT\\LapTrinhMangCanBan\\test\\NT106\\FinalProject\\MainForm.cs [Design]",
+              "ToolTip": "C:\\One_For_All\\Reporting\\NT106\\FinalProject\\MainForm.cs [Design]",
               "RelativeToolTip": "MainForm.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-04T16:08:10.585Z",
               "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "MainForm.cs",
+              "DocumentMoniker": "C:\\One_For_All\\Reporting\\NT106\\FinalProject\\MainForm.cs",
+              "RelativeDocumentMoniker": "MainForm.cs",
+              "ToolTip": "C:\\One_For_All\\Reporting\\NT106\\FinalProject\\MainForm.cs",
+              "RelativeToolTip": "MainForm.cs",
+              "ViewState": "AgIAABEAAAAAAAAAAAAuwCMAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-05T03:33:58.323Z",
+              "EditorCaption": ""
             }
           ]
         }

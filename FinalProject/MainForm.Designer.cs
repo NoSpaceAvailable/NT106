@@ -40,21 +40,20 @@ namespace FinalProject
             // 
             this.ColorsPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(245)))), ((int)(((byte)(235)))));
             this.ColorsPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.ColorsPanel.Location = new System.Drawing.Point(30, 29);
-            this.ColorsPanel.Margin = new System.Windows.Forms.Padding(20, 19, 20, 19);
+            this.ColorsPanel.Location = new System.Drawing.Point(20, 19);
+            this.ColorsPanel.Margin = new System.Windows.Forms.Padding(13, 12, 13, 12);
             this.ColorsPanel.Name = "ColorsPanel";
-            this.ColorsPanel.Size = new System.Drawing.Size(892, 154);
+            this.ColorsPanel.Size = new System.Drawing.Size(595, 99);
             this.ColorsPanel.TabIndex = 0;
             // 
             // DrawingArea
             // 
             this.DrawingArea.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(250)))));
             this.DrawingArea.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.DrawingArea.Location = new System.Drawing.Point(-6, 240);
-            this.DrawingArea.Margin = new System.Windows.Forms.Padding(4);
-            this.DrawingArea.MinimumSize = new System.Drawing.Size(2340, 1444);
+            this.DrawingArea.Location = new System.Drawing.Point(23, 155);
+            this.DrawingArea.MinimumSize = new System.Drawing.Size(1545, 722);
             this.DrawingArea.Name = "DrawingArea";
-            this.DrawingArea.Size = new System.Drawing.Size(2340, 1444);
+            this.DrawingArea.Size = new System.Drawing.Size(1545, 722);
             this.DrawingArea.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.DrawingArea.TabIndex = 1;
             this.DrawingArea.TabStop = false;
@@ -67,12 +66,11 @@ namespace FinalProject
             // 
             this.CursorSizeAdjust.AutoSize = false;
             this.CursorSizeAdjust.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(245)))), ((int)(((byte)(255)))));
-            this.CursorSizeAdjust.Location = new System.Drawing.Point(34, 192);
-            this.CursorSizeAdjust.Margin = new System.Windows.Forms.Padding(4);
+            this.CursorSizeAdjust.Location = new System.Drawing.Point(23, 123);
             this.CursorSizeAdjust.Maximum = 30;
             this.CursorSizeAdjust.Minimum = 1;
             this.CursorSizeAdjust.Name = "CursorSizeAdjust";
-            this.CursorSizeAdjust.Size = new System.Drawing.Size(374, 40);
+            this.CursorSizeAdjust.Size = new System.Drawing.Size(249, 26);
             this.CursorSizeAdjust.TabIndex = 2;
             this.CursorSizeAdjust.TickStyle = System.Windows.Forms.TickStyle.None;
             this.CursorSizeAdjust.Value = 5;
@@ -81,10 +79,10 @@ namespace FinalProject
             // 
             this.ToolsPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(255)))), ((int)(((byte)(240)))));
             this.ToolsPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.ToolsPanel.Location = new System.Drawing.Point(972, 29);
-            this.ToolsPanel.Margin = new System.Windows.Forms.Padding(6);
+            this.ToolsPanel.Location = new System.Drawing.Point(648, 19);
+            this.ToolsPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.ToolsPanel.Name = "ToolsPanel";
-            this.ToolsPanel.Size = new System.Drawing.Size(534, 154);
+            this.ToolsPanel.Size = new System.Drawing.Size(357, 99);
             this.ToolsPanel.TabIndex = 3;
             // 
             // button1
@@ -94,10 +92,10 @@ namespace FinalProject
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.button1.ForeColor = System.Drawing.Color.White;
-            this.button1.Location = new System.Drawing.Point(2130, 23);
-            this.button1.Margin = new System.Windows.Forms.Padding(6);
+            this.button1.Location = new System.Drawing.Point(1484, 16);
+            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(150, 58);
+            this.button1.Size = new System.Drawing.Size(100, 37);
             this.button1.TabIndex = 4;
             this.button1.Text = "RCE";
             this.button1.UseVisualStyleBackColor = true;
@@ -110,10 +108,10 @@ namespace FinalProject
             this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.button2.ForeColor = System.Drawing.Color.White;
-            this.button2.Location = new System.Drawing.Point(1968, 23);
-            this.button2.Margin = new System.Windows.Forms.Padding(6);
+            this.button2.Location = new System.Drawing.Point(1376, 16);
+            this.button2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(150, 58);
+            this.button2.Size = new System.Drawing.Size(100, 37);
             this.button2.TabIndex = 5;
             this.button2.Text = "Login";
             this.button2.UseVisualStyleBackColor = true;
@@ -126,10 +124,10 @@ namespace FinalProject
             this.OpenChatBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.OpenChatBtn.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.OpenChatBtn.ForeColor = System.Drawing.Color.White;
-            this.OpenChatBtn.Location = new System.Drawing.Point(1806, 23);
-            this.OpenChatBtn.Margin = new System.Windows.Forms.Padding(6);
+            this.OpenChatBtn.Location = new System.Drawing.Point(1268, 16);
+            this.OpenChatBtn.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.OpenChatBtn.Name = "OpenChatBtn";
-            this.OpenChatBtn.Size = new System.Drawing.Size(150, 58);
+            this.OpenChatBtn.Size = new System.Drawing.Size(100, 37);
             this.OpenChatBtn.TabIndex = 6;
             this.OpenChatBtn.Text = "Chat";
             this.OpenChatBtn.UseVisualStyleBackColor = true;
@@ -139,20 +137,20 @@ namespace FinalProject
             // 
             this.IPAddressTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.IPAddressTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.IPAddressTextBox.Location = new System.Drawing.Point(1968, 92);
-            this.IPAddressTextBox.Margin = new System.Windows.Forms.Padding(6);
+            this.IPAddressTextBox.Location = new System.Drawing.Point(1377, 64);
+            this.IPAddressTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.IPAddressTextBox.Name = "IPAddressTextBox";
-            this.IPAddressTextBox.Size = new System.Drawing.Size(310, 37);
+            this.IPAddressTextBox.Size = new System.Drawing.Size(207, 26);
             this.IPAddressTextBox.TabIndex = 7;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(1790, 98);
-            this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label1.Location = new System.Drawing.Point(1258, 68);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(133, 30);
+            this.label1.Size = new System.Drawing.Size(87, 20);
             this.label1.TabIndex = 9;
             this.label1.Text = "Remote IP";
             // 
@@ -160,10 +158,10 @@ namespace FinalProject
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(1790, 152);
-            this.label2.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label2.Location = new System.Drawing.Point(1258, 102);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(154, 30);
+            this.label2.Size = new System.Drawing.Size(101, 20);
             this.label2.TabIndex = 10;
             this.label2.Text = "Remote port";
             // 
@@ -171,19 +169,19 @@ namespace FinalProject
             // 
             this.PortTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.PortTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.PortTextBox.Location = new System.Drawing.Point(1968, 146);
-            this.PortTextBox.Margin = new System.Windows.Forms.Padding(6);
+            this.PortTextBox.Location = new System.Drawing.Point(1377, 98);
+            this.PortTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.PortTextBox.Name = "PortTextBox";
-            this.PortTextBox.Size = new System.Drawing.Size(310, 37);
+            this.PortTextBox.Size = new System.Drawing.Size(207, 26);
             this.PortTextBox.TabIndex = 8;
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.AutoSize = true;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(255)))));
-            this.ClientSize = new System.Drawing.Size(2310, 1369);
+            this.ClientSize = new System.Drawing.Size(1605, 893);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.PortTextBox);
@@ -196,9 +194,9 @@ namespace FinalProject
             this.Controls.Add(this.DrawingArea);
             this.Controls.Add(this.ColorsPanel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
-            this.Margin = new System.Windows.Forms.Padding(6);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "MainForm";
-            this.Padding = new System.Windows.Forms.Padding(20, 19, 20, 19);
+            this.Padding = new System.Windows.Forms.Padding(13, 12, 13, 12);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Advanced Paint";
             ((System.ComponentModel.ISupportInitialize)(this.DrawingArea)).EndInit();
