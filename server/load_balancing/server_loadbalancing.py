@@ -4,6 +4,7 @@ import threading
 import sys
 import time
 import select
+import struct
 
 SERVERS = []
 LB_HOST = '0.0.0.0'
@@ -82,49 +83,83 @@ def get_server_load(server):
         print(f"[!] Cannot get load from {server['host']}:{server['out_port']}: {e}")
         return float('inf')
 
+
 def forward_data(source_sock, dest_sock, direction, stop_event):
-    """Forward all available data in a single sendall call until stop_event is set."""
     try:
+        is_client_to_server = "to server" in direction
         while not stop_event.is_set():
-            # Use select to check if data is available with a short timeout
-            readable, _, _ = select.select([source_sock], [], [], 0.1)
+            readable, _, _ = select.select([source_sock], [], [], 1.0)
             if not readable:
-                continue  # No data available, loop again
+                continue
 
-            # Collect all available data
-            buffer = b""
-            while True:
-                try:
-                    # Set socket to non-blocking temporarily
-                    source_sock.setblocking(False)
-                    data = source_sock.recv(1024)
-                    if not data:
-                        print(f"[DEBUG] No more data from {direction}, signaling stop")
-                        stop_event.set()  # Client disconnected
-                        break
-                    buffer += data
-                except BlockingIOError:
-                    # No more data available right now
+            if is_client_to_server:
+                raw_room_id = source_sock.recv(4)
+                if len(raw_room_id) < 4:
+                    if raw_room_id:
+                        print(f"[DEBUG] Partial room ID ({len(raw_room_id)} bytes) from {direction}, signaling stop", flush=True)
+                    else:
+                        print(f"[DEBUG] No more data from {direction}, signaling stop", flush=True)
+                    stop_event.set()
                     break
-                finally:
-                    source_sock.setblocking(True)  # Restore blocking mode
 
-            if buffer:
-                print(f"[DEBUG] Forwarding {len(buffer)} bytes from {direction}: {buffer[:50].hex()}...")
-                dest_sock.sendall(buffer)
+                print(f"[DEBUG] Received room ID {raw_room_id.hex()} from {direction}", flush=True)
+                dest_sock.sendall(raw_room_id)
+                room_id = struct.unpack('<I', raw_room_id)[0]
+                print(f"[DEBUG] Room ID: {room_id} from {direction}", flush=True)
 
-            if stop_event.is_set():
-                break
+                raw_len = source_sock.recv(4)
+                if len(raw_len) < 4:
+                    print(f"[DEBUG] Partial length prefix ({len(raw_len)} bytes) from {direction}, signaling stop", flush=True)
+                    stop_event.set()
+                    break
+
+                print(f"[DEBUG] Received length prefix {raw_len.hex()} from {direction}", flush=True)
+                dest_sock.sendall(raw_len)
+                msg_len = struct.unpack('<I', raw_len)[0]
+                print(f"[DEBUG] Message length: {msg_len} bytes from {direction}", flush=True)
+
+                data = source_sock.recv(msg_len)
+                if len(data) < msg_len:
+                    print(f"[DEBUG] Incomplete payload from {direction}, got {len(data)}/{msg_len} bytes, signaling stop", flush=True)
+                    stop_event.set()
+                    break
+
+                print(f"[DEBUG] Forwarding {len(data)} bytes payload from {direction}: {data[:50].hex()}...", flush=True)
+                dest_sock.sendall(data)
+            else:
+                buffer = b""
+                source_sock.setblocking(False)
+                while True:
+                    try:
+                        data = source_sock.recv(1024)
+                        if not data:
+                            print(f"[DEBUG] No more data from {direction}, signaling stop", flush=True)
+                            stop_event.set()
+                            break
+                        buffer += data
+                        more_readable, _, _ = select.select([source_sock], [], [], 0.01)
+                        if not more_readable:
+                            break
+                    except BlockingIOError:
+                        break
+                source_sock.setblocking(True)
+
+                if buffer:
+                    print(f"[DEBUG] Forwarding {len(buffer)} bytes from {direction}: {buffer[:50].hex()}...", flush=True)
+                    dest_sock.sendall(buffer)
+
+                if stop_event.is_set():
+                    break
 
     except Exception as e:
-        print(f"[!] Error forwarding data ({direction}): {e}")
+        print(f"[!] Error forwarding data ({direction}): {e}", flush=True)
         stop_event.set()
 
 def handle_client(client_sock, addr):
-    print(f"[+] Client {addr} connected to Load Balancer")
+    print(f"[+] Client {addr} connected to Load Balancer", flush=True)
     best_server = choose_best_server()
     if best_server is None:
-        print("[-] No available servers.")
+        print("[-] No available servers.", flush=True)
         client_sock.close()
         return
 
@@ -132,8 +167,8 @@ def handle_client(client_sock, addr):
     try:
         server_sock = socket.create_connection((best_server["host"], best_server["in_port"]), timeout=10)
         server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-        print(f"[+] Connected to server {best_server['host']}:{best_server['in_port']} for client {addr}")
-        
+        print(f"[+] Connected to server {best_server['host']}:{best_server['in_port']} for client {addr}", flush=True)
+
         stop_event = threading.Event()
 
         client_to_server = threading.Thread(
@@ -149,7 +184,7 @@ def handle_client(client_sock, addr):
         server_to_client.join()
 
     except Exception as e:
-        print(f"[!] Error handling client {addr}: {e}")
+        print(f"[!] Error handling client {addr}: {e}", flush=True)
     finally:
         try:
             client_sock.close()
@@ -160,7 +195,7 @@ def handle_client(client_sock, addr):
                 server_sock.close()
             except:
                 pass
-        print(f"[-] Client {addr} connection closed.")
+        print(f"[-] Client {addr} connection closed.", flush=True)
 
 def start_load_balancer():
     health_thread = threading.Thread(target=background_health_check, daemon=True)
@@ -170,7 +205,7 @@ def start_load_balancer():
     lb_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     lb_sock.bind((LB_HOST, LB_PORT))
     lb_sock.listen()
-    print(f"[*] Load Balancer listening on {LB_HOST}:{LB_PORT}")
+    print(f"[*] Load Balancer listening on {LB_HOST}:{LB_PORT}", flush=True)
 
     try:
         while True:
@@ -178,13 +213,13 @@ def start_load_balancer():
             client_sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
             threading.Thread(target=handle_client, args=(client_sock, addr), daemon=True).start()
     except KeyboardInterrupt:
-        print("[!] Load Balancer shutting down")
+        print("[!] Load Balancer shutting down", flush=True)
     finally:
         lb_sock.close()
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Usage: python3 server_loadbalancing.py <LB_HOST> <LB_PORT> [<servers.json>]")
+        print("Usage: python3 server_loadbalancing.py <LB_HOST> <LB_PORT> [<servers.json>]", flush=True)
         sys.exit(1)
 
     LB_HOST = sys.argv[1]
