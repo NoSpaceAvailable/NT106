@@ -11,6 +11,13 @@ LB_HOST = '0.0.0.0'
 LB_PORT = 9000
 HEALTH_CHECK_INTERVAL = 30
 SERVER_HEALTH = {}
+
+#Already byte, just append to package
+DRAW_FIRST_CONNECT = b'\x01'    # First time client connect to load balancing server must have DRAW_FIRST_CONNECT byte header
+DRAW_ALREADY_CONNECT = b'\x02'  # Later package from client to draw server must have DRAW_ALREADY_CONNECT byte header
+DRAW_CHANGE_SERVER = b'\x03'    # When a server dead, send a package DRAW_CHANGE_SERVER to draw server     
+                                # The package must follow this format: DRAW_CHANGE_SERVER byte | room_id 4 byte    
+
 round_robin_index = 0
 health_lock = threading.Lock()  # Lock for SERVER_HEALTH
 selection_lock = threading.Lock()  # Lock for server selection and round_robin_index

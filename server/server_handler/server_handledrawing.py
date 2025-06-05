@@ -12,15 +12,17 @@ from collections import defaultdict
 rooms_clients = defaultdict(list)
 rooms = {}
 
+SERVER_PATH = "servers.json"
 HOST = '0.0.0.0'
 IN_PORT = 1337
 OUT_PORT = 1339
 width, height = 1545, 722
 
 SERVER = []
-FIRST_CONNECT = 1
-ALREADY_CONNECTED = 2
-PACKAGE_FROM_ANOTHER_SERVER = 3
+FIRST_CONNECT = b'\x01' 
+ALREADY_CONNECTED = b'\x02'
+CHANGE_SERVER = b'\x03'
+PACKAGE_FROM_ANOTHER_SERVER = b'\x04'
 
 lock = threading.Lock()
 
@@ -44,14 +46,13 @@ def load_servers_from_json(path="servers.json"):
         sys.exit(1)
 
 def broadcast_to_room(room_id, message, sender_socket):
-    with lock:
-        for client in rooms_clients[room_id][:]:
-            if client is not sender_socket:
-                try:
-                    client.sendall(message)
-                except:
-                    rooms_clients[room_id].remove(client)
-                    client.close()
+    for client in rooms_clients[room_id][:]:
+        if client is not sender_socket:
+            try:
+                client.sendall(message)
+            except:
+                rooms_clients[room_id].remove(client)
+                client.close()
 
 def broadcast_to_other_servers(package):
     for server in SERVER:
@@ -179,7 +180,6 @@ def handle_client(client_socket, addr):
                 print(f"[-] No state received from {addr}", flush=True)
                 client_socket.close()
                 return
-            State = struct.unpack('<B', State)[0]
 
             room_id = client_socket.recv(4)
             if not room_id:
@@ -188,7 +188,7 @@ def handle_client(client_socket, addr):
                 return
             room_id = struct.unpack('<I', room_id)[0]
 
-            if State == FIRST_CONNECT:
+            if State == FIRST_CONNECT or State == CHANGE_SERVER:
                 if room_id not in rooms:
                     with lock:
                         snapshot = load_room_image_from_db(room_id)
@@ -203,11 +203,14 @@ def handle_client(client_socket, addr):
                         "draw": ImageDraw.Draw(canvas)
                     }
 
-                    print(f"[+] Client {addr} connected to room {room_id}", flush=True)
-                    rooms_clients[room_id].append(client_socket)
-                    with lock:
-                        save_room_image_to_db(room_id, rooms[room_id]["canvas"])
+                print(f"[+] Client {addr} connected to room {room_id}", flush=True)
+                rooms_clients[room_id].append(client_socket)
+                with lock:
+                    save_room_image_to_db(room_id, rooms[room_id]["canvas"])
+
+                if State != CHANGE_SERVER:
                     send_canvas_to_client(client_socket, room_id)
+
             if State == FIRST_CONNECT or State == ALREADY_CONNECTED or State == PACKAGE_FROM_ANOTHER_SERVER:
                 raw_len = client_socket.recv(4)
                 if not raw_len:
@@ -228,9 +231,9 @@ def handle_client(client_socket, addr):
                 full_message = raw_len + data
                 apply_draw_packet_to_room(room_id, full_message)
                 broadcast_to_room(room_id, full_message, client_socket)
-                
+
                 if State != PACKAGE_FROM_ANOTHER_SERVER:
-                    full_message = struct.pack("<B", PACKAGE_FROM_ANOTHER_SERVER) + struct.pack("<I", room_id) + full_message
+                    full_message = PACKAGE_FROM_ANOTHER_SERVER + struct.pack("<I", room_id) + full_message
                     broadcast_to_other_servers(full_message)
                 else:
                     return
@@ -239,9 +242,8 @@ def handle_client(client_socket, addr):
         print(f"[!] Error with {addr}: {e}", flush=True)
     finally:
         print(f"[-] Client {addr} disconnected", flush=True)
-        with lock:
-            if client_socket in rooms_clients[room_id]:
-                rooms_clients[room_id].remove(client_socket)
+        if client_socket in rooms_clients[room_id]:
+            rooms_clients[room_id].remove(client_socket)
         client_socket.close()
         print(f"[-] Client {addr} removed from clients list of room {room_id}", flush=True)
         save_room_image_to_db(room_id, rooms[room_id]["canvas"])
@@ -293,13 +295,14 @@ def start_server_status():
 #IN_PORT for handle client connect
 #OUT_PORT for server load status
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage: python server.py <HOST> <IN_PORT> <OUT_PORT>", flush=True)
+    if len(sys.argv) < 4 or len(sys.argv) > 5:
+        print("Usage: python server.py <HOST> <IN_PORT> <OUT_PORT> [servers.json]", flush=True)
         exit()
     HOST = sys.argv[1]
     IN_PORT = int(sys.argv[2])
     OUT_PORT = int(sys.argv[3])
-    load_servers_from_json()
+    if(len(sys.argv) == 5):
+        load_servers_from_json(sys.argv[4])
     for i, server in enumerate(SERVER):
         if server["in_port"] == IN_PORT and server["out_port"] == OUT_PORT:
             popped = SERVER.pop(i)

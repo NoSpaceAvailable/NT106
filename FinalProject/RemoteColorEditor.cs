@@ -81,9 +81,10 @@ namespace FinalProject
                 var packet = new DrawPacket(datas.Take(len).ToArray(), crt_color);
                 string json = JsonSerializer.Serialize(packet);
 
-                byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
-
                 byte[] lengthPrefix = BitConverter.GetBytes(jsonBytes.Length);
+                byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
+                byte[] roomid = BitConverter.GetBytes(this.room_id);
+                stream.Write(roomid, 0, roomid.Length);
                 stream.Write(lengthPrefix, 0, lengthPrefix.Length);
                 stream.Write(jsonBytes, 0, jsonBytes.Length);
             }
@@ -117,7 +118,6 @@ namespace FinalProject
             {
                 MessageBox.Show("Error receiving data from server. Please check your connection.");
                 tcp.Close();
-                MessageBox.Show("Error receiving data from server. Please check your connection.");
                 return null;
             }
         }
@@ -179,6 +179,7 @@ namespace FinalProject
             {
                 MessageBox.Show($"Error connecting to server: {ex.Message}");
                 client = null;
+                this.Hide();
             }
             
         }
@@ -188,6 +189,7 @@ namespace FinalProject
             if (client == null)
             {
                 MessageBox.Show("No connection");
+                this.Hide();
             }
             else
             {
@@ -197,11 +199,17 @@ namespace FinalProject
                         client.Close();
                     client = null;
                     MessageBox.Show("Disconnected");
+                    ConnectBtn.Enabled = true;
+                    RoomTextBox.readonly = False;
+                    this.Hide();
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Error disconnecting to server: {ex.Message}");
                     client = null;
+                    ConnectBtn.Enabled = true;
+                    RoomTextBox.readonly = False;
+                    this.Hide();
                 }
             }
         }
@@ -219,6 +227,8 @@ namespace FinalProject
                     stream.Write(lengthPrefix, 0, lengthPrefix.Length);
                     Task.Run(() => Client());
                     this.room_id = room;
+                    ConnectBtn.Enabled = false;
+                    RoomTextBox.readonly = true;
                     this.Hide();
                 }
                 else if (client != null)
@@ -231,6 +241,9 @@ namespace FinalProject
             {
                 MessageBox.Show("Cannot connect to server");
                 client = null;
+                ConnectBtn.Enabled = true;
+                RoomTextBox.readonly = false;
+                this.Hide();
             }
 
         }
