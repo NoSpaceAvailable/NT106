@@ -3,6 +3,7 @@ import json
 import threading
 import sys
 import time
+import select
 
 SERVERS = []
 LB_HOST = '0.0.0.0'
@@ -115,6 +116,10 @@ def forward_data(source_sock, dest_sock, direction, stop_event):
             if stop_event.is_set():
                 break
 
+    except Exception as e:
+        print(f"[!] Error forwarding data ({direction}): {e}")
+        stop_event.set()
+
 def handle_client(client_sock, addr):
     print(f"[+] Client {addr} connected to Load Balancer")
     best_server = choose_best_server()
@@ -128,8 +133,7 @@ def handle_client(client_sock, addr):
         server_sock = socket.create_connection((best_server["host"], best_server["in_port"]), timeout=10)
         server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
         print(f"[+] Connected to server {best_server['host']}:{best_server['in_port']} for client {addr}")
-
-        # Create a stop event to synchronize thread termination
+        
         stop_event = threading.Event()
 
         client_to_server = threading.Thread(
