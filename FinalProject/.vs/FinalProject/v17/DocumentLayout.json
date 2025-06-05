@@ -1,10 +1,18 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "G:\\tailieudaihoc\\laptrinhmang\\doan\\NT106\\FinalProject\\",
+  "WorkspaceRootPath": "D:\\CourseUIT\\LapTrinhMangCanBan\\test\\NT106\\FinalProject\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|g:\\tailieudaihoc\\laptrinhmang\\doan\\nt106\\finalproject\\remotecoloreditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|D:\\CourseUIT\\LapTrinhMangCanBan\\test\\NT106\\FinalProject\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|solutionrelative:mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|d:\\courseuit\\laptrinhmangcanban\\test\\nt106\\finalproject\\remotecoloreditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|solutionrelative:remotecoloreditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|d:\\courseuit\\laptrinhmangcanban\\test\\nt106\\finalproject\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D05BBC27-4AC7-4D50-A0B5-C6B80E0F0B9A}|FinalProject.csproj|solutionrelative:mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,20 +22,45 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "RemoteColorEditor.cs",
-              "DocumentMoniker": "G:\\tailieudaihoc\\laptrinhmang\\doan\\NT106\\FinalProject\\RemoteColorEditor.cs",
-              "RelativeDocumentMoniker": "RemoteColorEditor.cs",
-              "ToolTip": "G:\\tailieudaihoc\\laptrinhmang\\doan\\NT106\\FinalProject\\RemoteColorEditor.cs",
-              "RelativeToolTip": "RemoteColorEditor.cs",
-              "ViewState": "AgIAACMAAAAAAAAAAAAswC4AAAAeAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "MainForm.cs",
+              "DocumentMoniker": "D:\\CourseUIT\\LapTrinhMangCanBan\\test\\NT106\\FinalProject\\MainForm.cs",
+              "RelativeDocumentMoniker": "MainForm.cs",
+              "ToolTip": "D:\\CourseUIT\\LapTrinhMangCanBan\\test\\NT106\\FinalProject\\MainForm.cs",
+              "RelativeToolTip": "MainForm.cs",
+              "ViewState": "AgIAAF4AAAAAAAAAAAA/wHUAAAAfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-02T14:08:49.697Z",
+              "WhenOpened": "2025-06-05T03:33:58.323Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "RemoteColorEditor.cs",
+              "DocumentMoniker": "D:\\CourseUIT\\LapTrinhMangCanBan\\test\\NT106\\FinalProject\\RemoteColorEditor.cs",
+              "RelativeDocumentMoniker": "RemoteColorEditor.cs",
+              "ToolTip": "D:\\CourseUIT\\LapTrinhMangCanBan\\test\\NT106\\FinalProject\\RemoteColorEditor.cs",
+              "RelativeToolTip": "RemoteColorEditor.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-04T16:10:02.548Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MainForm.cs [Design]",
+              "DocumentMoniker": "D:\\CourseUIT\\LapTrinhMangCanBan\\test\\NT106\\FinalProject\\MainForm.cs",
+              "RelativeDocumentMoniker": "MainForm.cs",
+              "ToolTip": "D:\\CourseUIT\\LapTrinhMangCanBan\\test\\NT106\\FinalProject\\MainForm.cs [Design]",
+              "RelativeToolTip": "MainForm.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-04T16:08:10.585Z",
+              "EditorCaption": " [Design]"
             }
           ]
         }

@@ -31,6 +31,13 @@ namespace FinalProject
         public const int MOVE = 2;
         public const int UP = 3;
 
+        // authentication area
+        private bool isAuthenticated = false;
+        private String username = null;
+
+        // data for chat handler
+        private int room_id = -1;
+
         public enum ShapeType
         {
             FreeDraw,
@@ -278,7 +285,7 @@ namespace FinalProject
             int buttonSize = 30;
             for (int i = 0; i <= colors.Length; i++)
             {
-                if(i == colors.Length)
+                if (i == colors.Length)
                 {
                     Button customBtn = new Button
                     {
@@ -485,7 +492,7 @@ namespace FinalProject
                 e.Graphics.DrawImage(previewBitmap, Point.Empty);
             }
         }
-        
+
         //Draw shape on buffer and render to graphics
         private void DrawShape(Point start, Point end, ShapeType shape, Color color)
         {
@@ -495,7 +502,7 @@ namespace FinalProject
                 bufferedGraphics.Render(DrawingArea.CreateGraphics());
             }
         }
-        
+
         //Draw shape on offscreen buffer
         private void DrawShapeOnGraphics(Graphics g, Point start, Point end, ShapeType shape, Color color)
         {
@@ -533,7 +540,7 @@ namespace FinalProject
                 }
             }
         }
-        
+
         //Drawing package received from network
         public void DrawFromNetwork(Draw_data[] datas, Color crt_color)
         {
@@ -557,8 +564,8 @@ namespace FinalProject
 
                         break;
                     case MOVE:
-                        if(x.Shape == ShapeType.FreeDraw)
-                        { 
+                        if (x.Shape == ShapeType.FreeDraw)
+                        {
                             using (Pen pen = new Pen(crt_color, x.penWid))
                             {
                                 pen.StartCap = LineCap.Round;
@@ -572,7 +579,7 @@ namespace FinalProject
                                     x.X - x.penWid / 2, x.Y - x.penWid / 2, x.penWid, x.penWid);
                             }
                             lock (lockObj) bufferedGraphics.Render(DrawingArea.CreateGraphics());
-                                prevPoint = x.Location.ToPoint();
+                            prevPoint = x.Location.ToPoint();
                         }
                         break;
                     case UP:
@@ -599,8 +606,13 @@ namespace FinalProject
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if(remotecoloreditor == null || remotecoloreditor.IsDisposed)
-                remotecoloreditor = new RemoteColorEditor(this);
+            if (!isAuthenticated)
+            {
+                MessageBox.Show("Please login first!");
+                return;
+            }
+            if (remotecoloreditor == null || remotecoloreditor.IsDisposed)
+                remotecoloreditor = new RemoteColorEditor(this, IPAddressTextBox.Text, PortTextBox.Text);
             remotecoloreditor.Show();
         }
 
@@ -647,6 +659,43 @@ namespace FinalProject
         public void renderGraphic()
         {
 
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (String.IsNullOrEmpty(IPAddressTextBox.Text) || String.IsNullOrEmpty(PortTextBox.Text))
+            {
+                MessageBox.Show("Please enter IP address and port number.");
+                return;
+            }
+            int port;
+            if (!int.TryParse(PortTextBox.Text, out port) || port <= 0 || port > 65535)
+            {
+                MessageBox.Show("Invalid port number. Please enter a valid port (1-65535).");
+                return;
+            }
+            Authentication authentication = new Authentication(IPAddressTextBox.Text);
+            authentication.ShowDialog();
+            if (authentication.AuthResult)
+            {
+                MessageBox.Show("Authentication successful!");
+                this.isAuthenticated = true;
+            } else
+            {
+                MessageBox.Show("Authentication failed! Please try again.");
+                return;
+            }
+        }
+
+        private void OpenChatBtn_Click(object sender, EventArgs e)
+        {
+            if (room_id == -1)
+            {
+                MessageBox.Show("RCE please!");
+                return;
+            }
+            ChatForm chat = new ChatForm();
+            chat.Show();
         }
     }
 }
