@@ -80,9 +80,8 @@ namespace FinalProject
                 NetworkStream stream = tcp.GetStream();
                 var packet = new DrawPacket(datas.Take(len).ToArray(), crt_color);
                 string json = JsonSerializer.Serialize(packet);
-
-                byte[] lengthPrefix = BitConverter.GetBytes(jsonBytes.Length);
                 byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
+                byte[] lengthPrefix = BitConverter.GetBytes(jsonBytes.Length);
                 byte[] roomid = BitConverter.GetBytes(this.room_id);
                 stream.Write(roomid, 0, roomid.Length);
                 stream.Write(lengthPrefix, 0, lengthPrefix.Length);
@@ -200,7 +199,7 @@ namespace FinalProject
                     client = null;
                     MessageBox.Show("Disconnected");
                     ConnectBtn.Enabled = true;
-                    RoomTextBox.readonly = False;
+                    RoomTextBox.ReadOnly = false;
                     this.Hide();
                 }
                 catch (Exception ex)
@@ -208,7 +207,7 @@ namespace FinalProject
                     MessageBox.Show($"Error disconnecting to server: {ex.Message}");
                     client = null;
                     ConnectBtn.Enabled = true;
-                    RoomTextBox.readonly = False;
+                    RoomTextBox.ReadOnly = false;
                     this.Hide();
                 }
             }
@@ -228,7 +227,7 @@ namespace FinalProject
                     Task.Run(() => Client());
                     this.room_id = room;
                     ConnectBtn.Enabled = false;
-                    RoomTextBox.readonly = true;
+                    RoomTextBox.ReadOnly = true;
                     this.Hide();
                 }
                 else if (client != null)
@@ -242,7 +241,7 @@ namespace FinalProject
                 MessageBox.Show("Cannot connect to server");
                 client = null;
                 ConnectBtn.Enabled = true;
-                RoomTextBox.readonly = false;
+                RoomTextBox.ReadOnly = false;
                 this.Hide();
             }
 
