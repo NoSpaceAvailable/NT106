@@ -142,7 +142,8 @@ def run_auth_server():
     
     try:
         while True:
-            # Set a timeout to allow checking for KeyboardInterrupt
+            # Set a timeout to allow checking for CTRL + C
+            # please remove this line on prod
             server.settimeout(1) 
             try:
                 client_socket, client_address = server.accept()

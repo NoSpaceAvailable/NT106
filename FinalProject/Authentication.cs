@@ -14,7 +14,7 @@ namespace FinalProject
         private readonly int Port = 10000;    // this will be fixed
         private char delimiter = '|';
 
-        private int BUFF_SIZE = 256; // bytes
+        private int BUFF_SIZE = 1024; // bytes
 
         private String JWTtoken = String.Empty;
         private String username = String.Empty;
@@ -22,7 +22,10 @@ namespace FinalProject
         enum Action
         {
             Login,
-            Register
+            Register,
+            Verify,
+            SendMessage,
+            Broadcast
         }
 
         enum AuthStatus
@@ -85,24 +88,44 @@ namespace FinalProject
             return true;
         }
 
+        /*
+            Structure of an authentication packet:
+                action | username | password
+         */
+
+        /*
+            Structure of a response for the authentication request:
+                - If the authentication is success:   
+                    success_auth_state | auth_token
+                - The others:
+                    error_auth_state
+
+            Auth state are declared as in enum AuthStatus
+         */
+
         private int SendDataToAuthServer(String username, String password, int action)
         {
             try
             {
                 TcpClient client = new TcpClient(IPAddr, Port);
-
                 NetworkStream stream = client.GetStream();
+
                 String dataToSend = $"{action}{delimiter}{username}{delimiter}{password}";
+
                 byte[] sendBuffer = Encoding.UTF8.GetBytes(dataToSend);
                 stream.Write(sendBuffer, 0, sendBuffer.Length);
 
                 byte[] reveiceBuffer = new byte[BUFF_SIZE];
                 int bytesRead = stream.Read(reveiceBuffer, 0, reveiceBuffer.Length);
                 String data = Encoding.UTF8.GetString(reveiceBuffer, 0, bytesRead);
+
+                // only need this stream to register or login so close it
                 stream.Close();
 
                 String[] splitted = data.Split(delimiter);
                 int status = int.Parse(splitted[0]);
+
+                // authenticated only
                 if (status == (int)AuthStatus.AuthenticationSuccessful)
                 {
                     this.JWTtoken = splitted[1];
