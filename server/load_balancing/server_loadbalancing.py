@@ -149,6 +149,8 @@ def forward_data(source_sock, dest_sock, direction, stop_event):
 
                 print(f"[DEBUG] Forwarding {len(data)} bytes payload from {direction}: {data[:50].hex()}...", flush=True)
                 data_to_send += data
+                print(f"[DEBUG] Total data to send: {len(data_to_send)} bytes", flush=True)
+                print(f"[DEBUG] Data to send: {data_to_send[:50].hex()}...", flush=True)
                 dest_sock.sendall(data_to_send)
                 CONNECTED_IP[source_sock.getpeername()] = 1
             else:
