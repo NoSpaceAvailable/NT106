@@ -228,7 +228,7 @@ def handle_client(client_socket, addr):
 
                 full_message = raw_len + data
                 apply_draw_packet_to_room(room_id, full_message)
-                broadcast_to_room(room_id, full_message, client_socket)
+                broadcast_to_room(room_id, struct.pack("<I", room_id) + full_message, client_socket)
 
                 if State != PACKAGE_FROM_ANOTHER_SERVER:
                     full_message = PACKAGE_FROM_ANOTHER_SERVER + struct.pack("<I", room_id) + full_message
