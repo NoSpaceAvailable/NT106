@@ -238,7 +238,7 @@ namespace FinalProject
             }
             catch
             {
-                MessageBox.Show("Cannot connect to server");
+                MessageBox.Show($"Cannot connect to server {this.remote_addr} {port} {room}");
                 client = null;
                 ConnectBtn.Enabled = true;
                 RoomTextBox.ReadOnly = false;

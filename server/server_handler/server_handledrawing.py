@@ -55,7 +55,7 @@ def broadcast_to_room(room_id, message, sender_socket):
                 client.close()
 
 def broadcast_to_other_servers(package):
-    for server in SERVER:
+    for server in SERVERS:
         try:
             print(f"[+] Broadcasting to {server['host']}:{server['in_port']}", flush=True)
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -227,12 +227,15 @@ def handle_client(client_socket, addr):
 
                 if not data:
                     break
-
+                print(f"[+] Received data from {addr} for room {room_id}", flush=True)
                 full_message = raw_len + data
                 apply_draw_packet_to_room(room_id, full_message)
+                print(f"[+] Applied draw packet to room {room_id}", flush=True)
                 broadcast_to_room(room_id, struct.pack("<I", room_id) + full_message, client_socket)
-
+                print(f"[+] Broadcasted draw packet to room {room_id}", flush=True)
+                print(State, flush=True)
                 if State != PACKAGE_FROM_ANOTHER_SERVER:
+                    print(f"[+] Sending draw packet to other servers for room {room_id}", flush=True)
                     full_message = PACKAGE_FROM_ANOTHER_SERVER + struct.pack("<I", room_id) + full_message
                     broadcast_to_other_servers(full_message)
                 else:
@@ -303,9 +306,9 @@ if __name__ == "__main__":
     OUT_PORT = int(sys.argv[3])
     if(len(sys.argv) == 5):
         load_servers_from_json(sys.argv[4])
-    for i, server in enumerate(SERVER):
+    for i, server in enumerate(SERVERS):
         if server["in_port"] == IN_PORT and server["out_port"] == OUT_PORT:
-            popped = SERVER.pop(i)
+            popped = SERVERS.pop(i)
             break
     print(f"[*] Starting server on {HOST}:{IN_PORT}\n[*] Get server load status through {HOST}:{OUT_PORT}", flush=True)
     listening = threading.Thread(target=start_server_listening, args = (), daemon = True)
