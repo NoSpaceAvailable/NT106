@@ -223,9 +223,9 @@ namespace FinalProject
                     MessageBox.Show("Connected to server");
                     NetworkStream stream = client.GetStream();
                     byte[] lengthPrefix = BitConverter.GetBytes(room);
-                    //stream.Write(lengthPrefix, 0, lengthPrefix.Length);
-                    Task.Run(() => Client());
+                    stream.Write(lengthPrefix, 0, lengthPrefix.Length);
                     this.room_id = room;
+                    Task.Run(() => Client());
                     ConnectBtn.Enabled = false;
                     RoomTextBox.ReadOnly = true;
                     this.Hide();

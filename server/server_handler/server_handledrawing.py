@@ -66,7 +66,7 @@ def broadcast_to_other_servers(package):
             print(f"[Error] Could not send to {server['host']}:{server['in_port']} - {e}")
             pass
         finally:
-            continue
+            pass
 
 def apply_draw_packet_to_room(room, packet_bytes):
     try:
@@ -187,7 +187,7 @@ def handle_client(client_socket, addr):
                 client_socket.close()
                 return
             room_id = struct.unpack('<I', room_id)[0]
-
+            print(f"[+] Client {addr} requested room {room_id} with state {State}", flush=True)
             if State == FIRST_CONNECT or State == CHANGE_SERVER:
                 if room_id not in rooms:
                     with lock:
@@ -211,7 +211,7 @@ def handle_client(client_socket, addr):
                 if State != CHANGE_SERVER:
                     send_canvas_to_client(client_socket, room_id)
 
-            if State == FIRST_CONNECT or State == ALREADY_CONNECTED or State == PACKAGE_FROM_ANOTHER_SERVER:
+            if State == ALREADY_CONNECTED or State == PACKAGE_FROM_ANOTHER_SERVER:
                 raw_len = client_socket.recv(4)
                 if not raw_len:
                     break
