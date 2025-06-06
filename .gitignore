@@ -1,4 +1,5 @@
 *.db
 /FinalProject/.vs
 /FinalProject/bin
+/FinalProject/debug
 /FinalProject/obj
