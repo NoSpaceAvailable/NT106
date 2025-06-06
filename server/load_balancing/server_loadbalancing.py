@@ -128,29 +128,29 @@ def forward_data(source_sock, dest_sock, direction, stop_event):
                 room_id = struct.unpack('<I', raw_room_id)[0]
                 print(f"[DEBUG] Room ID: {room_id} from {direction}", flush=True)
                 ROOMS[source_sock.getpeername()] = room_id
+                if CONNECTED_IP.get(source_sock.getpeername(), 0):
+                    raw_len = source_sock.recv(4)
+                    if len(raw_len) < 4:
+                        print(f"[DEBUG] Partial length prefix ({len(raw_len)} bytes) from {direction}, signaling stop", flush=True)
+                        stop_event.set()
+                        break
 
-                raw_len = source_sock.recv(4)
-                if len(raw_len) < 4:
-                    print(f"[DEBUG] Partial length prefix ({len(raw_len)} bytes) from {direction}, signaling stop", flush=True)
-                    stop_event.set()
-                    break
+                    print(f"[DEBUG] Received length prefix {raw_len.hex()} from {direction}", flush=True)
+                    data_to_send += raw_len
+                    msg_len = struct.unpack('<I', raw_len)[0]
+                    print(f"[DEBUG] Message length: {msg_len} bytes from {direction}", flush=True)
 
-                print(f"[DEBUG] Received length prefix {raw_len.hex()} from {direction}", flush=True)
-                data_to_send += raw_len
-                msg_len = struct.unpack('<I', raw_len)[0]
-                print(f"[DEBUG] Message length: {msg_len} bytes from {direction}", flush=True)
+                    data = source_sock.recv(msg_len)
+                    if len(data) < msg_len:
+                        print(f"[DEBUG] Incomplete payload from {direction}, got {len(data)}/{msg_len} bytes, signaling stop", flush=True)
+                        print(f"[DEBUG] Data: {data.hex()[:50]}...", flush=True)
+                        stop_event.set()
+                        break
 
-                data = source_sock.recv(msg_len)
-                if len(data) < msg_len:
-                    print(f"[DEBUG] Incomplete payload from {direction}, got {len(data)}/{msg_len} bytes, signaling stop", flush=True)
-                    print(f"[DEBUG] Data: {data.hex()[:50]}...", flush=True)
-                    stop_event.set()
-                    break
-
-                print(f"[DEBUG] Forwarding {len(data)} bytes payload from {direction}: {data[:50].hex()}...", flush=True)
-                data_to_send += data
-                print(f"[DEBUG] Total data to send: {len(data_to_send)} bytes", flush=True)
-                print(f"[DEBUG] Data to send: {data_to_send[:50].hex()}...", flush=True)
+                    print(f"[DEBUG] Forwarding {len(data)} bytes payload from {direction}: {data[:50].hex()}...", flush=True)
+                    data_to_send += data
+                    print(f"[DEBUG] Total data to send: {len(data_to_send)} bytes", flush=True)
+                    print(f"[DEBUG] Data to send: {data_to_send[:50].hex()}...", flush=True)
                 dest_sock.sendall(data_to_send)
                 CONNECTED_IP[source_sock.getpeername()] = 1
             else:
