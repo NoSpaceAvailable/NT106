@@ -1,7 +1,7 @@
 [
-  { "host": "localhost", "in_port": 2001, "out_port": 3001 },
-  { "host": "localhost", "in_port": 2002, "out_port": 3002 },
-  { "host": "localhost", "in_port": 2003, "out_port": 3003 },
-  { "host": "localhost", "in_port": 2004, "out_port": 3004 },
-  { "host": "localhost", "in_port": 2005, "out_port": 3005 }
+  { "host": "server1", "in_port": 2001, "out_port": 3001 },
+  { "host": "server2", "in_port": 2002, "out_port": 3002 },
+  { "host": "server3", "in_port": 2003, "out_port": 3003 },
+  { "host": "server4", "in_port": 2004, "out_port": 3004 },
+  { "host": "server5", "in_port": 2005, "out_port": 3005 }
 ]

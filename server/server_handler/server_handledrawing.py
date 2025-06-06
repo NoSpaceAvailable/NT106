@@ -57,6 +57,7 @@ def broadcast_to_room(room_id, message, sender_socket):
 def broadcast_to_other_servers(package):
     for server in SERVER:
         try:
+            print(f"[+] Broadcasting to {server['host']}:{server['in_port']}", flush=True)
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.connect((server["host"], server["in_port"]))
             sock.sendall(package)
@@ -69,6 +70,7 @@ def broadcast_to_other_servers(package):
 
 def apply_draw_packet_to_room(room, packet_bytes):
     try:
+        # print(packet_bytes, flush=True)
         packet_json = packet_bytes[4:].decode("utf-8")
         packet = json.loads(packet_json)
 

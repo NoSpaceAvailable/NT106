@@ -123,7 +123,7 @@ def forward_data(source_sock, dest_sock, direction, stop_event):
                     stop_event.set()
                     break
 
-                print(f"[DEBUG] Received room ID {raw_room_id.hex()} from {direction}", flush=True)
+                # print(f"[DEBUG] Received room ID {raw_room_id.hex()} from {direction}", flush=True)
                 data_to_send += raw_room_id
                 room_id = struct.unpack('<I', raw_room_id)[0]
                 print(f"[DEBUG] Room ID: {room_id} from {direction}", flush=True)
@@ -143,6 +143,7 @@ def forward_data(source_sock, dest_sock, direction, stop_event):
                 data = source_sock.recv(msg_len)
                 if len(data) < msg_len:
                     print(f"[DEBUG] Incomplete payload from {direction}, got {len(data)}/{msg_len} bytes, signaling stop", flush=True)
+                    print(f"[DEBUG] Data: {data.hex()[:50]}...", flush=True)
                     stop_event.set()
                     break
 
