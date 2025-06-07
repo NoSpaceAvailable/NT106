@@ -167,7 +167,7 @@ def send_canvas_to_client(client_socket, room_id):
         canvas.save(buf, format="PNG")
         img_bytes = buf.getvalue()
         length_prefix = struct.pack('<I', len(img_bytes))
-        client_socket.sendall(length_prefix + img_bytes)
+        client_socket.sendall(struct.pack("<I", room_id) + length_prefix + img_bytes)
         print(f"[+] Sent canvas snapshot of room {room_id} to client", flush=True)
     except Exception as e:
         print(f"[!] Failed to send canvas: {e}", flush=True)
