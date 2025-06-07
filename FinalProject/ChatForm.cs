@@ -5,8 +5,6 @@ using System.Drawing;
 using System.Net.Sockets;
 using System.Text;
 using System.IO.Compression;
-using System.Globalization;
-using System.Runtime.Remoting.Messaging;
 using System.Threading.Tasks;
 
 namespace FinalProject
@@ -87,9 +85,10 @@ namespace FinalProject
                 byte[] initialMessage = Encoding.UTF8.GetBytes($"{(int)Action.SendMessage}|{this.username}|{this.AuthToken}|{(int)MessageType.Text}||");
                 this.networkStream.Write(initialMessage, 0, initialMessage.Length);
 
-
-                byte[] buffer = new byte[BUFF_SIZE * 4]; // Increased buffer for images
+                // image too large, longer buffer
+                byte[] buffer = new byte[BUFF_SIZE * 512];  
                 int bytesRead;
+
 
                 while ((bytesRead = this.networkStream.Read(buffer, 0, buffer.Length)) > 0)
                 {
@@ -112,7 +111,7 @@ namespace FinalProject
                         if (parts.Length == 5 && parts[0] == $"{(int)Action.Broadcast}")
                         {
                             String senderUsername = parts[1];
-                            String messageType    = parts[2];
+                            String messageType = parts[2];
                             String messageContent = parts[3];
                             // ignore parts[4]
 
@@ -132,10 +131,65 @@ namespace FinalProject
                             }
                             else if (messageType.Equals($"{(int)MessageType.Image}"))
                             {
-                                MessageBox.Show("Unimplemented!");
-                            } else
-                            {
-                                MessageBox.Show("Received invalid message!");
+                                Bitmap image = Decompress(messageContent);
+                                if (image != null)
+                                {
+                                    // Create a panel to hold the timestamp and the image
+                                    Panel imagePanel = new Panel();
+                                    imagePanel.AutoSize = true;
+                                    imagePanel.Margin = new Padding(10);
+                                    imagePanel.BackColor = Color.LightGray;
+                                    imagePanel.Padding = new Padding(5);
+
+                                    // Label for timestamp and sender
+                                    Label timestampLabel = new Label();
+                                    timestampLabel.Text = $"[{GetCurrentTime()}]\r\n({senderUsername}):";
+                                    timestampLabel.AutoSize = true;
+                                    timestampLabel.Dock = DockStyle.Top;
+                                    imagePanel.Controls.Add(timestampLabel);
+
+                                    // PictureBox for the image
+                                    PictureBox pictureBox = new PictureBox();
+                                    pictureBox.Image = image;
+                                    pictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
+
+                                    // Calculate appropriate size
+                                    int maxWidth = DisplayChatArea.ClientSize.Width - 50;
+                                    int newWidth, newHeight;
+
+                                    if (image.Width > maxWidth)
+                                    {
+                                        double ratio = (double)maxWidth / image.Width;
+                                        newWidth = maxWidth;
+                                        newHeight = (int)(image.Height * ratio);
+                                    }
+                                    else
+                                    {
+                                        newWidth = image.Width;
+                                        newHeight = image.Height;
+                                    }
+
+                                    pictureBox.Size = new Size(newWidth, newHeight);
+                                    pictureBox.Top = timestampLabel.Bottom + 5;
+                                    imagePanel.Controls.Add(pictureBox);
+
+                                    DisplayChatArea.Controls.Add(imagePanel);
+                                    DisplayChatArea.ScrollControlIntoView(imagePanel);
+                                }
+                                else
+                                {
+                                    Label errorLabel = new Label
+                                    {
+                                        Text = $"[{GetCurrentTime()}]\r\n({senderUsername}) [Failed to load image]",
+                                        AutoSize = true,
+                                        Margin = new Padding(10),
+                                        Padding = new Padding(5),
+                                        BackColor = Color.LightCoral,
+                                        MaximumSize = new Size(DisplayChatArea.ClientSize.Width - 30, 0)
+                                    };
+                                    DisplayChatArea.Controls.Add(errorLabel);
+                                    DisplayChatArea.ScrollControlIntoView(errorLabel);
+                                }
                             }
                         }
                     });
@@ -143,7 +197,7 @@ namespace FinalProject
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Connection lost: {ex.Message}");
+                MessageBox.Show($"Error: {ex.Message}");
             }
         }
 
@@ -205,14 +259,14 @@ namespace FinalProject
         // This one reverse the above method to display the image to the chat box
         private Bitmap Decompress(String hexOfCompressedImage)
         {
-            byte[] data = HexStringToByteArray(hexOfCompressedImage);
-            if (data == null || data.Length == 0)
+            byte[] compressedData = HexStringToByteArray(hexOfCompressedImage);
+            if (compressedData == null || compressedData.Length == 0)
             {
                 return null;
             }
             try
             {
-                using (MemoryStream memStream = new MemoryStream())
+                using (MemoryStream memStream = new MemoryStream(compressedData))
                 {
                     using (GZipStream decompressStream = new GZipStream(memStream, CompressionMode.Decompress))
                     {
@@ -300,6 +354,8 @@ namespace FinalProject
                     Panel imagePanel = new Panel();
                     imagePanel.AutoSize = true;
                     imagePanel.Margin = new Padding(10);
+                    imagePanel.BackColor = Color.FromArgb(225, 245, 254);
+                    imagePanel.Padding = new Padding(5);
 
                     // Label for timestamp
                     Label timestampLabel = new Label();
@@ -312,20 +368,22 @@ namespace FinalProject
                     image.Image = Image.FromFile(filePath);
                     image.SizeMode = PictureBoxSizeMode.StretchImage;
 
-                    int ratio;
-                    int newWidth;
-                    if (image.Image.Width > ChatInputBox.Width)
+                    int maxWidth = DisplayChatArea.ClientSize.Width - 50;
+                    int newWidth, newHeight;
+
+                    if (image.Image.Width > maxWidth)
                     {
-                        newWidth = DisplayChatArea.Width;
-                        ratio = image.Image.Width / newWidth;
+                        double ratio = (double)maxWidth / image.Image.Width;
+                        newWidth = maxWidth;
+                        newHeight = (int)(image.Image.Height * ratio);
                     }
                     else
                     {
                         newWidth = image.Image.Width;
-                        ratio = 1;
+                        newHeight = image.Image.Height;
                     }
-                    image.Width = newWidth;
-                    image.Height = image.Image.Height / ratio;
+
+                    image.Size = new Size(newWidth, newHeight);
                     image.Top = timestampLabel.Bottom + 5;
                     imagePanel.Controls.Add(image);
 
@@ -333,7 +391,14 @@ namespace FinalProject
                     DisplayChatArea.ScrollControlIntoView(imagePanel);
 
                     String compressedImageData = Compress(filePath);
-                    SendMessageToServer(compressedImageData, (int)MessageType.Image);
+                    if (compressedImageData != null)
+                    {
+                        SendMessageToServer(compressedImageData, (int)MessageType.Image);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Failed to compress image.");
+                    }
                 }
                 catch (Exception ex)
                 {

@@ -78,7 +78,7 @@ def handle_client(client_socket: socket.socket, client_address):
     try:
         while True:
             try:
-                client_socket.settimeout(3) # Timeout for recv, 10 seconds
+                client_socket.settimeout(3) # Timeout for recv
                 data = b''
                 counter = 0
                 while True:
@@ -134,8 +134,8 @@ def handle_client(client_socket: socket.socket, client_address):
                         print(f"[+] User '{current_session_username}' from {client_address} session authenticated.")
 
                     if not message: # Empty message content
-                        print(f"[-] User '{current_session_username}' sent an empty message. Acknowledging.")
-                        client_socket.send(f'{Success}'.encode()) # Acknowledge, but do nothing else
+                        print(f"[-] User '{current_session_username}' sent an empty message, dropping...")
+                        client_socket.send(f'{Success}'.encode()) # Do nothing else
                         continue
                     
                     # Process and acknowledge the message
