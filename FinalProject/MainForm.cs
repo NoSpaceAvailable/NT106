@@ -39,6 +39,9 @@ namespace FinalProject
         // data for chat handler
         private int room_id = -1;
 
+        // singleton object
+        private ChatForm chat = null;
+
         public enum ShapeType
         {
             FreeDraw,
@@ -665,6 +668,11 @@ namespace FinalProject
 
         private void button2_Click(object sender, EventArgs e)
         {
+            if (this.isAuthenticated == true || this.username != null || this.authToken != null)
+            {
+                MessageBox.Show("Already logged in!");
+                return;
+            }
             if (String.IsNullOrEmpty(IPAddressTextBox.Text) || String.IsNullOrEmpty(PortTextBox.Text))
             {
                 MessageBox.Show("Please enter IP address and port number.");
@@ -699,8 +707,11 @@ namespace FinalProject
                 MessageBox.Show("RCE please!");
                 return;
             }
-            ChatForm chat = new ChatForm(this.username, this.authToken, IPAddressTextBox.Text);
-            chat.Show();
+            if (this.chat == null || this.chat.IsDisposed)
+            {
+                this.chat = new ChatForm(this.username, this.authToken, IPAddressTextBox.Text);
+            }
+            this.chat.Show();
         }
     }
 }

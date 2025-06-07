@@ -100,3 +100,4 @@ C:\One_For_All\Reporting\NT106\FinalProject\obj\Debug\FinalProject.csproj.CoreCo
 C:\One_For_All\Reporting\NT106\FinalProject\obj\Debug\FinalPro.8C09D514.Up2Date
 C:\One_For_All\Reporting\NT106\FinalProject\obj\Debug\FinalProject.exe
 C:\One_For_All\Reporting\NT106\FinalProject\obj\Debug\FinalProject.pdb
+D:\CourseUIT\LapTrinhMangCanBan\test\NT106\FinalProject\obj\Debug\FinalProject.ChatForm.resources

@@ -1,6 +1,6 @@
 *.db
 .vscode
 .vs
-bin
-debug
+bin*
+Debug*
 
