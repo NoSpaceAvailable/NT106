@@ -23,6 +23,7 @@ FIRST_CONNECT = b'\x01'
 ALREADY_CONNECTED = b'\x02'
 CHANGE_SERVER = b'\x03'
 PACKAGE_FROM_ANOTHER_SERVER = b'\x04'
+SYNC_CLIENT = b'\x05'
 
 lock = threading.Lock()
 
@@ -173,22 +174,41 @@ def send_canvas_to_client(client_socket, room_id):
 
 def handle_client(client_socket, addr):
     print(f"[+] New connection from {addr}", flush=True)
+    room_id = None
     try:
         while True:
             State = client_socket.recv(1)
-            if not State:
-                print(f"[-] No state received from {addr}", flush=True)
-                client_socket.close()
-                return
+            while not State:
+                State = client_socket.recv(1)
+                if client_socket.fileno() == -1:
+                    print(f"[-] Client {addr} disconnected", flush=True)
+                    return
 
             room_id = client_socket.recv(4)
-            if not room_id:
-                print(f"[-] No room ID received from {addr}", flush=True)
-                client_socket.close()
-                return
+            while not room_id:
+                room_id = client_socket.recv(4)
+                if client_socket.fileno() == -1:
+                    print(f"[-] Client {addr} disconnected", flush=True)
+                    return
+                
             room_id = struct.unpack('<I', room_id)[0]
             print(f"[+] Client {addr} requested room {room_id} with state {State}", flush=True)
+
+            if (State == PACKAGE_FROM_ANOTHER_SERVER or State == SYNC_CLIENT) and room_id not in rooms:
+                print(f"[!] Room {room_id} not found in local server, ignoring package from another server", flush=True)
+                client_socket.close()
+                return
+            
+            if State == SYNC_CLIENT:
+                if room_id in rooms:
+                    save_room_image_to_db(room_id, rooms[room_id]["canvas"])
+                    client_socket.close()
+                return
+
             if State == FIRST_CONNECT or State == CHANGE_SERVER:
+                if State == FIRST_CONNECT:
+                    broadcast_to_other_servers(SYNC_CLIENT + struct.pack("<I", room_id))
+                    time.sleep(1)
                 if room_id not in rooms:
                     with lock:
                         snapshot = load_room_image_from_db(room_id)
@@ -233,7 +253,6 @@ def handle_client(client_socket, addr):
                 print(f"[+] Applied draw packet to room {room_id}", flush=True)
                 broadcast_to_room(room_id, struct.pack("<I", room_id) + full_message, client_socket)
                 print(f"[+] Broadcasted draw packet to room {room_id}", flush=True)
-                print(State, flush=True)
                 if State != PACKAGE_FROM_ANOTHER_SERVER:
                     print(f"[+] Sending draw packet to other servers for room {room_id}", flush=True)
                     full_message = PACKAGE_FROM_ANOTHER_SERVER + struct.pack("<I", room_id) + full_message
@@ -244,14 +263,16 @@ def handle_client(client_socket, addr):
     except Exception as e:
         print(f"[!] Error with {addr}: {e}", flush=True)
     finally:
-        print(f"[-] Client {addr} disconnected", flush=True)
-        if client_socket in rooms_clients[room_id]:
-            rooms_clients[room_id].remove(client_socket)
         client_socket.close()
-        print(f"[-] Client {addr} removed from clients list of room {room_id}", flush=True)
-        save_room_image_to_db(room_id, rooms[room_id]["canvas"])
-        if not rooms_clients[room_id]:
-            rooms.pop(room_id, None)
+        print(f"[-] Client {addr} disconnected", flush=True)
+        if room_id is not None:
+            if room_id in rooms_clients and client_socket in rooms_clients[room_id]:
+                rooms_clients[room_id].remove(client_socket)
+                print(f"[-] Client {addr} removed from clients list of room {room_id}", flush=True)
+            if room_id in rooms:
+                save_room_image_to_db(room_id, rooms[room_id]["canvas"])
+            if room_id in rooms_clients and not rooms_clients[room_id]:
+                rooms.pop(room_id, None)
 
 def start_server_listening():
     try:
