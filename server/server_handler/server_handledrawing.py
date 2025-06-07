@@ -265,6 +265,8 @@ def handle_client(client_socket, addr):
     finally:
         client_socket.close()
         print(f"[-] Client {addr} disconnected", flush=True)
+        if State == PACKAGE_FROM_ANOTHER_SERVER or State == SYNC_CLIENT:
+            return
         if room_id is not None:
             if room_id in rooms_clients and client_socket in rooms_clients[room_id]:
                 rooms_clients[room_id].remove(client_socket)

@@ -160,23 +160,50 @@ def forward_data(source_sock, dest_sock, direction, stop_event):
             else:
                 buffer = b""
                 source_sock.setblocking(False)
-                while True:
+                room_id = source_sock.recv(4)
+                if len(room_id) < 4:
+                    if room_id:
+                        print(f"[DEBUG] Partial room ID ({len(room_id)} bytes) from {direction}, signaling stop", flush=True)
+                    else:
+                        print(f"[DEBUG] No more data from {direction}, signaling stop", flush=True)
+                    stop_event.set()
+                    break
+                raw_len = source_sock.recv(4)
+                msg_len = struct.unpack('<I', raw_len)[0]
+                print(f"[DEBUG] Message length: {msg_len} bytes from {direction}", flush=True)
+                buffer += raw_len
+                packet = b""
+                while len(packet) < msg_len:
                     try:
-                        data = source_sock.recv(1024)
+                        data = source_sock.recv(msg_len - len(packet))
                         if not data:
                             print(f"[DEBUG] No more data from {direction}, signaling stop", flush=True)
                             stop_event.set()
                             break
-                        buffer += data
+                        packet += data
                         more_readable, _, _ = select.select([source_sock], [], [], 0.01)
                         if not more_readable:
                             break
                     except BlockingIOError:
                         break
+                # while True:
+                #     try:
+                #         data = source_sock.recv(1024)
+                #         if not data:
+                #             print(f"[DEBUG] No more data from {direction}, signaling stop", flush=True)
+                #             stop_event.set()
+                #             break
+                #         buffer += data
+                #         more_readable, _, _ = select.select([source_sock], [], [], 0.01)
+                #         if not more_readable:
+                #             break
+                #     except BlockingIOError:
+                #         break
                 source_sock.setblocking(True)
 
-                if buffer:
+                if packet:
                     print(f"[DEBUG] Forwarding {len(buffer)} bytes from {direction}: {buffer[:50].hex()}...", flush=True)
+                    buffer += packet
                     dest_sock.sendall(buffer)
 
                 if stop_event.is_set():
