@@ -115,7 +115,6 @@ namespace FinalProject
             }
             catch
             {
-                MessageBox.Show("Error receiving data from server. Please check your connection.");
                 tcp.Close();
                 return null;
             }

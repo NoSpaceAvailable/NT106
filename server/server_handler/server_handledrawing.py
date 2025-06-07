@@ -24,6 +24,7 @@ ALREADY_CONNECTED = b'\x02'
 CHANGE_SERVER = b'\x03'
 PACKAGE_FROM_ANOTHER_SERVER = b'\x04'
 SYNC_CLIENT = b'\x05'
+DONE = b'\x06'
 
 lock = threading.Lock()
 
@@ -55,13 +56,15 @@ def broadcast_to_room(room_id, message, sender_socket):
                 rooms_clients[room_id].remove(client)
                 client.close()
 
-def broadcast_to_other_servers(package):
+def broadcast_to_other_servers(package, _sync = False):
     for server in SERVERS:
         try:
             print(f"[+] Broadcasting to {server['host']}:{server['in_port']}", flush=True)
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.connect((server["host"], server["in_port"]))
             sock.sendall(package)
+            if _sync:
+                sock.recv(1)
             sock.close()
         except Exception as e:
             print(f"[Error] Could not send to {server['host']}:{server['in_port']} - {e}")
@@ -202,13 +205,13 @@ def handle_client(client_socket, addr):
             if State == SYNC_CLIENT:
                 if room_id in rooms:
                     save_room_image_to_db(room_id, rooms[room_id]["canvas"])
-                    client_socket.close()
+                client_socket.sendall(struct.pack("<B", DONE))
+                client_socket.close()
                 return
 
             if State == FIRST_CONNECT or State == CHANGE_SERVER:
                 if State == FIRST_CONNECT:
-                    broadcast_to_other_servers(SYNC_CLIENT + struct.pack("<I", room_id))
-                    time.sleep(1)
+                    broadcast_to_other_servers(SYNC_CLIENT + struct.pack("<I", room_id), True)
                 if room_id not in rooms:
                     with lock:
                         snapshot = load_room_image_from_db(room_id)
