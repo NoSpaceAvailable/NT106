@@ -1,6 +1,7 @@
 import socket
 import threading
 import struct
+from collections import defaultdict
 
 HOST = '0.0.0.0'
 PORT = 10001
@@ -33,15 +34,14 @@ OTHER_CLIENT = b'\x02'
 
 delimiter = '|'
 PACK_SIZE = 1024
-clients = []  # List to store (client_socket, username) for broadcasting
-
+clients = {}  # Dict to store (client_socket, username) for broadcasting
 
 def check_auth(username, token):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((AUTH_SERVER_HOST, AUTH_SERVER_PORT))
         sock.send(f'{Verify}{delimiter}{username}{delimiter}{token}'.encode())
-        response = sock.recv(PACK_SIZE).decode()
+        response = sock.recv(PACK_SIZE).decode()[4:]
         sock.close()
         if response.split(delimiter)[0] == Success:
             return True
@@ -50,34 +50,47 @@ def check_auth(username, token):
         print(f"[-] Error checking auth: {str(e)}")
         return False
 
-def broadcast_message(message_payload, message_type, message_sender_username, originating_socket):
+def broadcast_message(message_payload, message_type, message_sender_username, originating_socket, room):
     """
-    Broadcasts a message to all connected and authenticated clients except the sender.
-    The message_payload should be the actual content (example: "Hahahahaha lmao ez ez").
-    The server will construct the full protocol message for broadcasting.
+    Broadcasts a message to all clients in the specified room_id, excluding the sender.
     """
-    clients_copy = list(clients) # Iterate over a copy
+    if room not in clients:
+        print(f"[-] Room ID {room} not found.")
+        return
+
+    clients_copy = list(clients[room])
     for client_sock, client_user in clients_copy:
         if client_sock != originating_socket:
             try:
-                # Construct the message as per client expectation for a received message
-                # Structure of a broadcast message:
-                #       action | username | type | message |
-                # Where action is Broadcast
+                # Construct broadcast message
                 broadcast_msg_str = f'{Broadcast}|{message_sender_username}|{message_type}|{message_payload}|'
-                print(f'[+] Broadcasting payload: {broadcast_msg_str}')
+                print(f'[+] Broadcasting payload to room {room}: {broadcast_msg_str}')
                 client_sock.sendall(OTHER_CLIENT + broadcast_msg_str.encode())
             except Exception as e:
                 print(f"[-] Error broadcasting to {client_user}: {str(e)}. Removing client.")
-                clients.remove((client_sock, client_user)) # Remove problematic client
+                clients[room].remove((client_sock, client_user))
                 client_sock.close()
 
+    # Clean up empty room
+    if not clients[room]:
+        del clients[room]
+
+def remove_client_from_all_rooms(client_socket):
+    for room_id in list(clients.keys()):
+        original_len = len(clients[room_id])
+        clients[room_id] = [(sock, user) for sock, user in clients[room_id] if sock != client_socket]
+
+        if len(clients[room_id]) < original_len:
+            print(f"[-] Removed client from room {room_id}")
+
+        if not clients[room_id]:
+            del clients[room_id]
 
 def handle_client(client_socket: socket.socket, client_address):
     print(f"[+] Accepted connection from {client_address}")
     current_session_username = None
     is_session_authenticated = False
-
+    room_id = None
     try:
         while True:
             try:
@@ -85,12 +98,12 @@ def handle_client(client_socket: socket.socket, client_address):
                 if not room_id:
                     print(f"[-] Missing client room id")
                     break
-                room_id = struct.unpack("<I", room_id)
-                print(f"[+] Received {client_socket} {room_id}")
+                room_id = struct.unpack("<I", room_id)[0]
+                print(f"[+] Received room {room_id}")
             except:
                 print(f"[-] Error while receiving room id")
                 break
-
+            
             try:
                 data = b''
                 counter = 0
@@ -106,7 +119,7 @@ def handle_client(client_socket: socket.socket, client_address):
                 if not data:
                     print(f"[-] Client {client_address} (User: {current_session_username}) disconnected (received empty data).")
                     break
-
+                print(f"[+] Received data from {client_address} (User: {current_session_username}): {data}")
                 data = data.strip(b'\0').decode()
 
                 parts = data.split(delimiter, maxsplit=5)
@@ -134,14 +147,15 @@ def handle_client(client_socket: socket.socket, client_address):
                         client_socket.send(CURRENT_CLIENT + f'{InvalidCredentials}'.encode())
                         print(f"[-] Sent InvalidCredentials to {username}@{client_address}.")
                         continue
-                    
+                    print("Authenticated user:", username)
                     # Authenticated for this message
                     if not is_session_authenticated:
                         current_session_username = username
                         is_session_authenticated = True
                         # Add to clients list for broadcasting if not already there
-                        if not any(sock == client_socket for sock, _ in clients):
-                            clients.append((client_socket, current_session_username))
+                        if room_id not in clients:
+                            clients[room_id] = []
+                        clients[room_id].append((client_socket, current_session_username))
                         print(f"[+] User '{current_session_username}' from {client_address} session authenticated.")
 
                     if not message: # Empty message content
@@ -155,11 +169,13 @@ def handle_client(client_socket: socket.socket, client_address):
                     
                     # Broadcast the message
                     print(f'[+] Broadcasting message...')
+
                     broadcast_message(
                         message_payload = f"{message}", 
                         message_type = msg_type,
                         message_sender_username = current_session_username, 
-                        originating_socket = client_socket
+                        originating_socket = client_socket,
+                        room = room_id
                     )
 
                 else:
@@ -184,9 +200,8 @@ def handle_client(client_socket: socket.socket, client_address):
     finally:
         print(f"[-] Closing connection for {client_address} (User: {current_session_username}).")
         # Remove client from list
-        clients[:] = [(sock, user) for sock, user in clients if sock != client_socket]
+        remove_client_from_all_rooms(client_socket)
         client_socket.close()
-
 
 def run_chat_server():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

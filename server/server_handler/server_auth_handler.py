@@ -3,13 +3,21 @@ import sqlite3
 from hashlib import md5
 import threading
 import struct
+import psycopg2
 
 HOST = '0.0.0.0'
 PORT = 10000
 lock = threading.Lock()
 
 
-db = 'users.db'
+conn = psycopg2.connect(
+    host="database",
+    port=5432,
+    dbname="rooms",
+    user="postgresql",
+    password="095f75fe10f6541b51d4a1ca84a993ac274ac14bee50a6c7a7df6c79cffd1946"
+)
+
 secret = b'0b6825b36ec7459e37d7e463a19daa44a9b5cc63dd98146fccb525552dd086ca'
 
 Login = '0'
@@ -34,59 +42,39 @@ def sign_token(username: str):
     return md5(username.encode() + secret).hexdigest()
 
 
-def get_conn():
-    conn = sqlite3.connect(db)
-    return conn
-
-
 def start_server_auth():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((HOST, PORT))
     server.listen(5)
     print(f"[+] Server is listening on {HOST}:{PORT}")
 
-
-def init_db():
-    conn = get_conn()
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL UNIQUE,
-            hashed_pw TEXT NOT NULL
-        );
-    ''')
-    conn.commit()
-
-
 def login(username, password):
     hashed_pw = md5(password.encode()).hexdigest()
-    print(username, hashed_pw)
-    conn = get_conn()
-    cursor = conn.cursor()
-    data = cursor.execute('SELECT * FROM users WHERE username=? AND hashed_pw=?', (username, hashed_pw)).fetchone()
-    if data:
-        conn.close()
-        return True
-    return False
-
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute('SELECT * FROM user_creds WHERE username=%s AND hashed_pw=%s', (username, hashed_pw))
+            data = cursor.fetchone()
+            return data is not None
+    except Exception as e:
+        print(f"[-] Login DB error: {e}")
+        return False
 
 def register(username, password):
-    conn = get_conn()
-    cursor = conn.cursor()
-    result = cursor.execute('SELECT * FROM users WHERE username=?', (username, )).fetchall()
-    if result:
-        conn.close()
-        return False
     hashed_pw = md5(password.encode()).hexdigest()
-    print(username, hashed_pw)
-    result = cursor.execute('INSERT INTO users (username, hashed_pw) VALUES (?, ?)', (username, hashed_pw)).lastrowid
-    if result:
-        conn.commit()
-        conn.close()
-        return True
-    conn.close()
-    return False
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute('SELECT * FROM user_creds WHERE username=%s', (username,))
+            result = cursor.fetchall()
+            if result:
+                return False  # Username exists
+
+            cursor.execute('INSERT INTO user_creds (username, hashed_pw) VALUES (%s, %s)', (username, hashed_pw))
+            conn.commit()
+            return True
+    except Exception as e:
+        print(f"[-] Register DB error: {e}")
+        conn.rollback()
+        return False
 
 def handle_client(client_socket, client_address):
     try:
@@ -163,5 +151,4 @@ def run_auth_server():
         print("[!] Server closed")
 
 if __name__ == '__main__':
-    init_db()
     run_auth_server()

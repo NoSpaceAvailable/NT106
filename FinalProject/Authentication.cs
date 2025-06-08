@@ -123,7 +123,7 @@ namespace FinalProject
                 String dataToSend = $"{action}{delimiter}{username}{delimiter}{password}";
 
                 byte[] sendBuffer = Encoding.UTF8.GetBytes(dataToSend);
-                stream.Write(prefix, 0, prefix.Length); // Prefix for load balancing
+                stream.Write(prefix, 0, 1); // Prefix for load balancing
                 stream.Write(sendBuffer, 0, sendBuffer.Length);
 
                 byte[] reveiceBuffer = new byte[BUFF_SIZE];

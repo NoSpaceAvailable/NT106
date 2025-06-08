@@ -3,7 +3,11 @@ FROM python:3.11-slim
 WORKDIR /app
 COPY requirements.txt ./requirements.txt
 COPY server_auth_handler.py ./server_auth_handler.py
+RUN apt-get update && apt-get install -y procps curl
+
+RUN curl -o /usr/local/bin/wait-for-it https://raw.githubusercontent.com/vishnubob/wait-for-it/refs/heads/master/wait-for-it.sh \
+    && chmod +x /usr/local/bin/wait-for-it
 
 RUN pip install -r requirements.txt
 
-CMD ["sh", "-c", "python3 server_auth_handler.py"]
+CMD ["sh", "-c", "wait-for-it database:5432 -- python3 server_auth_handler.py"]

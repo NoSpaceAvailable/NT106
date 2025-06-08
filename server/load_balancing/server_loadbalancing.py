@@ -173,7 +173,7 @@ def forward_data(source_sock, dest_sock, direction, stop_event, type_header):
                             stop_event.set()
                             break
 
-                        print(f"[DEBUG] Forwarding {len(data)} bytes payload from {direction}: {data[:50].hex()}...", flush=True)
+                        print(f"[DEBUG] Forwarding {len(data)} bytes payload from {direction}: {data}", flush=True)
                         data_to_send += data
                         print(f"[DEBUG] Total data to send: {len(data_to_send)} bytes", flush=True)
                         print(f"[DEBUG] Data to send: {data_to_send[:50].hex()}...", flush=True)
@@ -181,7 +181,7 @@ def forward_data(source_sock, dest_sock, direction, stop_event, type_header):
                     CONNECTED_IP[source_sock.getpeername()] = 1
 
                 elif type_header == CHAT_HEADER:
-                    data = b''
+                    data = b'' 
                     counter = 0
                     while True:
                         pack = source_sock.recv(CHAT_PACK_SIZE)
@@ -193,6 +193,7 @@ def forward_data(source_sock, dest_sock, direction, stop_event, type_header):
                         print(f"[DEBUG] CHAT No more data from {direction}, signaling stop", flush=True)
                         stop_event.set()
                         break
+                    print(f"[DEBUG] CHAT Forwarding {len(data)} bytes from {direction}: {data}", flush=True)
                     dest_sock.sendall(data)
                 
                 elif type_header == AUTH_HEADER:
@@ -256,7 +257,8 @@ def forward_data(source_sock, dest_sock, direction, stop_event, type_header):
                            counter += pack.count(b'|')
                            if counter >= 4:
                                break
-                        dest_sock.sendall(buffer)
+                        dest_sock.sendall(data)
+
                     if type_chat == CHAT_CURRENT:
                         dest_sock.sendall(source_sock.recv(1))
                  
@@ -286,10 +288,8 @@ def handle_client(client_sock, addr):
     max_retries = 3
     retry_count = 0
     server_sock = None
-    Type = client_sock.recv(1) #Header 2 byte
-    client_sock.recv(1)
     best_server = None
-    print(Type)
+    Type = client_sock.recv(1) #Header 2 byte
     while retry_count < max_retries:
         if Type == DRAW_HEADER:
             best_server = choose_best_server()

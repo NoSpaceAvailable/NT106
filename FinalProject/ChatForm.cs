@@ -92,7 +92,9 @@ namespace FinalProject
 
                 // Send a single warm-up message to authenticate the session
                 byte[] initialMessage = Encoding.UTF8.GetBytes($"{(int)Action.SendMessage}|{this.username}|{this.AuthToken}|{(int)MessageType.Text}||");
-                this.networkStream.Write(prefix, 0, prefix.Length);
+                byte[] room = BitConverter.GetBytes(mainForm.room_id);
+                this.networkStream.Write(prefix, 0, 1);
+                this.networkStream.Write(room, 0, room.Length);
                 this.networkStream.Write(initialMessage, 0, initialMessage.Length);
 
                 // image too large, longer buffer
@@ -305,7 +307,7 @@ namespace FinalProject
                 String msg = $"{(int)Action.SendMessage}|{this.username}|{this.AuthToken}|{type}|{message}|";
                 byte[] messageBytes = Encoding.UTF8.GetBytes(msg);
                 byte[] room = BitConverter.GetBytes(mainForm.room_id);
-                this.networkStream.Write(prefix, 0, prefix.Length); // Prefix for load balancing
+                this.networkStream.Write(prefix, 0, 1); // Prefix for load balancing
                 this.networkStream.Write(room, 0, room.Length);
                 this.networkStream.Write(messageBytes, 0, messageBytes.Length);
             }

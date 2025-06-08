@@ -79,7 +79,7 @@ namespace FinalProject
                 byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
                 byte[] lengthPrefix = BitConverter.GetBytes(jsonBytes.Length);
                 byte[] roomid = BitConverter.GetBytes(this.room_id); 
-                stream.Write(prefix, 0, prefix.Length); // Prefix for load balancing
+                stream.Write(prefix, 0, 1); // Prefix for load balancing
                 stream.Write(roomid, 0, roomid.Length);
                 stream.Write(lengthPrefix, 0, lengthPrefix.Length);
                 stream.Write(jsonBytes, 0, jsonBytes.Length);
@@ -220,7 +220,7 @@ namespace FinalProject
                     NetworkStream stream = client.GetStream();
                     byte[] room_id = BitConverter.GetBytes(room);
                     byte[] prefix = BitConverter.GetBytes(DRAW);
-                    stream.Write(prefix, 0, prefix.Length); // Prefix for load balancing
+                    stream.Write(prefix, 0, 1); // Prefix for load balancing
                     stream.Write(room_id, 0, room_id.Length);
                     this.room_id = room;
                     Task.Run(() => Client());

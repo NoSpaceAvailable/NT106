@@ -181,7 +181,7 @@ def handle_client(client_socket, addr):
     room_id = None
     try:
         while True:
-            
+
             State = client_socket.recv(1)    
             while not State:
                 State = client_socket.recv(1)
@@ -229,6 +229,8 @@ def handle_client(client_socket, addr):
                     }
 
                 print(f"[+] Client {addr} connected to room {room_id}", flush=True)
+                if room_id not in rooms_clients:
+                    rooms_clients[room_id] = []
                 rooms_clients[room_id].append(client_socket)
                 with lock:
                     save_room_image_to_db(room_id, rooms[room_id]["canvas"])
