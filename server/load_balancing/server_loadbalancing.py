@@ -190,7 +190,7 @@ def forward_data(source_sock, dest_sock, direction, stop_event, type_header):
                         print(f"[DEBUG] CHAT No more data from {direction}, signaling stop", flush=True)
                         stop_event.set()
                         break
-                    print(f"[DEBUG] CHAT Forwarding {len(data)} bytes from {direction}: {data}", flush=True)
+                    print(f"[DEBUG] CHAT Forwarding {len(data)} bytes from {direction}: {data[:50]}", flush=True)
                     dest_sock.sendall(data)
                 
                 elif type_header == AUTH_HEADER:
@@ -249,11 +249,12 @@ def forward_data(source_sock, dest_sock, direction, stop_event, type_header):
                         data = b""
                         counter = 0
                         while True:
-                           pack = source_sock.recv(CHAT_PACK_SIZE)
+                           pack = source_sock.recv(CHAT_PACK_SIZE * 512)
                            data += pack
                            counter += pack.count(b'|')
                            if counter >= 4:
                                break
+                        data = struct.pack("<I", len(data)) + data
                         dest_sock.sendall(data)
 
                     if type_chat == CHAT_CURRENT:

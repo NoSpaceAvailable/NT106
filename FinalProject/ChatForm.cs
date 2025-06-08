@@ -98,14 +98,27 @@ namespace FinalProject
                 this.networkStream.Write(initialMessage, 0, initialMessage.Length);
 
                 // image too large, longer buffer
-                byte[] buffer = new byte[BUFF_SIZE * 512];  
+                byte[] buffer = new byte[BUFF_SIZE * 512];
+                byte[] tmp = new byte[8];
                 int bytesRead;
-
-
-                while ((bytesRead = this.networkStream.Read(buffer, 0, buffer.Length)) > 0)
+                while (true)
                 {
-                    String response = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim('\0');
-
+                    if (this.networkStream.Read(tmp, 0, 4) != 4)
+                        continue;
+                    int data_len = BitConverter.ToInt32(tmp, 0);
+                    if (data_len <= 0 || data_len > buffer.Length)
+                    {
+                        MessageBox.Show($"Received invalid data length from server {data_len}");
+                        continue;
+                    }
+                    bytesRead = 0;
+                    int ptr = 0;
+                    while (bytesRead < data_len)
+                    {
+                        bytesRead += this.networkStream.Read(buffer, ptr, data_len - bytesRead);
+                        ptr = bytesRead;
+                    }
+                    String response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                     // Ensure that controls are created
                     if (!this.IsHandleCreated)
                     {

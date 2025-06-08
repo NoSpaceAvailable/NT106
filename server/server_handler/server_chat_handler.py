@@ -162,7 +162,7 @@ def handle_client(client_socket: socket.socket, client_address):
                         continue
                     
                     # Process and acknowledge the message
-                    print(f"[+] Message from '{current_session_username}': {message}", flush=True)
+                    print(f"[+] Message from '{current_session_username}': {message[:50]}", flush=True)
                     client_socket.send(CURRENT_CLIENT + f'{Success}'.encode()) # Send '0' for success
                     
                     # Broadcast the message
