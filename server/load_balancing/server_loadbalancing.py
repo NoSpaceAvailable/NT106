@@ -10,11 +10,8 @@ SERVERS = []
 LB_HOST = '0.0.0.0'
 LB_PORT = 9000
 
-CHAT_SERVER = {"host": "0.0.0.0", "in_port": 10001}
-AUTH_SERVER = {"host": "0.0.0.0", "in_port": 10000}
-
-AUTH_HOST = '0.0.0.0'
-AUTH_PORT = 10000
+CHAT_SERVER = {"host": "chatserver", "in_port": 10001}
+AUTH_SERVER = {"host": "authserver", "in_port": 10000}
 
 HEALTH_CHECK_INTERVAL = 30
 SERVER_HEALTH = {}
@@ -395,6 +392,20 @@ def start_load_balancer():
     finally:
         lb_sock.close()
 
+def wait_for_port(host, port, timeout=60):
+    start_time = time.time()
+    while True:
+        try:
+            with socket.create_connection((host, port), timeout=2):
+                print(f"[✓] {host}:{port} is available.")
+                return True
+        except OSError:
+            if time.time() - start_time > timeout:
+                print(f"[✗] Timeout: {host}:{port} not available after {timeout}s.")
+                return False
+            print(f"[...] Waiting for {host}:{port}...")
+            time.sleep(1)
+
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("Usage: python3 server_loadbalancing.py <LB_HOST> <LB_PORT> [<servers.json>]", flush=True)
@@ -405,4 +416,10 @@ if __name__ == "__main__":
     json_path = sys.argv[3] if len(sys.argv) > 3 else "servers.json"
 
     load_servers_from_json(json_path)
+    for server in SERVERS:
+        host = server["host"]
+        port = server["in_port"]
+        wait_for_port(host, port, timeout=60)
+    wait_for_port(AUTH_SERVER["host"], AUTH_SERVER["in_port"])
+    wait_for_port(CHAT_SERVER["host"], CHAT_SERVER["in_port"])
     start_load_balancer()

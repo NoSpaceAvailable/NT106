@@ -610,11 +610,11 @@ namespace FinalProject
 
         private void button1_Click(object sender, EventArgs e)
         {
-            //if (!isAuthenticated)
-            //{
-            //    MessageBox.Show("Please login first!");
-            //    return;
-            //}
+            if (!isAuthenticated)
+            {
+               MessageBox.Show("Please login first!");
+               return;
+            }
             if (remotecoloreditor == null || remotecoloreditor.IsDisposed)
                 remotecoloreditor = new RemoteColorEditor(this);
             remotecoloreditor.ShowDialog();

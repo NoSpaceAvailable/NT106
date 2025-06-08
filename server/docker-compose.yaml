@@ -1,30 +1,32 @@
 version: '3.8'
 services:
-  # loadbalancer:
-  #   build:
-  #     context: server_handler
-  #     dockerfile: Dockerfile.loadserver
-  #   ports:
-  #     - "7000:7000"
-  #   environment:
-  #     - HOST=loadsv
-  #     - PORT=7000
-  #   depends_on:
-  #     - server0
-  #     - server1
-  #     - server2
-  #     - server3
-  #     - server4
-  #   networks:
-  #     - drawnet
+  loadbalancer:
+    build:
+      context: load_balancing
+      dockerfile: Dockerfile.loadserver
+    ports:
+      - "7000:7000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=7000
+    depends_on:
+      - server0
+      - server1
+      - server2
+      - server3
+      - server4
+      - chatserver
+      - authserver
+    networks:
+      - drawnet
 
   server0:
     build:
       context: server_handler
       dockerfile: Dockerfile.server
     ports:
-      - '2001:2001'
-      - '3001:3001'
+      - '2001'
+      - '3001'
     environment:
       - IN_PORT=2001
       - OUT_PORT=3001
@@ -36,8 +38,8 @@ services:
       context: server_handler
       dockerfile: Dockerfile.server
     ports:
-      - '2002:2002'
-      - '3002:3002'
+      - '2002'
+      - '3002'
     environment:
       - IN_PORT=2002
       - OUT_PORT=3002
@@ -49,8 +51,8 @@ services:
       context: server_handler
       dockerfile: Dockerfile.server
     ports:
-      - '2003:2003'
-      - '3003:3003'
+      - '2003'
+      - '3003'
     environment:
       - IN_PORT=2003
       - OUT_PORT=3003
@@ -62,8 +64,8 @@ services:
       context: server_handler
       dockerfile: Dockerfile.server
     ports:
-      - '2004:2004'
-      - '3004:3004'
+      - '2004'
+      - '3004'
     environment:
       - IN_PORT=2004
       - OUT_PORT=3004
@@ -75,8 +77,8 @@ services:
       context: server_handler
       dockerfile: Dockerfile.server
     ports:
-      - '2005:2005'
-      - '3005:3005'
+      - '2005'
+      - '3005'
     environment:
       - IN_PORT=2005
       - OUT_PORT=3005
@@ -88,7 +90,7 @@ services:
       context: server_handler
       dockerfile: Dockerfile.authserver
     ports:
-      - '10000:10000'
+      - '10000'
     networks:
       - drawnet
 
@@ -97,12 +99,14 @@ services:
       context: server_handler
       dockerfile: Dockerfile.chatserver
     ports:
-      - '10001:10001'
+      - '10001'
     networks:
       - drawnet
   
   database:
-    build: ./postgresql
+    build:
+      context: postgresql
+      dockerfile: Dockerfile
     ports:
       - '5432'
     environment:

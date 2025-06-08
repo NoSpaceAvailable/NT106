@@ -1,12 +1,11 @@
 import socket
 import threading
 import struct
-from collections import defaultdict
 
 HOST = '0.0.0.0'
 PORT = 10001
 
-AUTH_SERVER_HOST = '127.0.0.1'
+AUTH_SERVER_HOST = 'authserver'
 AUTH_SERVER_PORT = 10000
 
 # Action Codes
@@ -47,7 +46,7 @@ def check_auth(username, token):
             return True
         return False
     except Exception as e:
-        print(f"[-] Error checking auth: {str(e)}")
+        print(f"[-] Error checking auth: {str(e)}", flush=True)
         return False
 
 def broadcast_message(message_payload, message_type, message_sender_username, originating_socket, room):
@@ -55,7 +54,7 @@ def broadcast_message(message_payload, message_type, message_sender_username, or
     Broadcasts a message to all clients in the specified room_id, excluding the sender.
     """
     if room not in clients:
-        print(f"[-] Room ID {room} not found.")
+        print(f"[-] Room ID {room} not found.", flush=True)
         return
 
     clients_copy = list(clients[room])
@@ -64,10 +63,10 @@ def broadcast_message(message_payload, message_type, message_sender_username, or
             try:
                 # Construct broadcast message
                 broadcast_msg_str = f'{Broadcast}|{message_sender_username}|{message_type}|{message_payload}|'
-                print(f'[+] Broadcasting payload to room {room}: {broadcast_msg_str}')
+                print(f'[+] Broadcasting payload to room {room}: {broadcast_msg_str}', flush=True)
                 client_sock.sendall(OTHER_CLIENT + broadcast_msg_str.encode())
             except Exception as e:
-                print(f"[-] Error broadcasting to {client_user}: {str(e)}. Removing client.")
+                print(f"[-] Error broadcasting to {client_user}: {str(e)}. Removing client.", flush=True)
                 clients[room].remove((client_sock, client_user))
                 client_sock.close()
 
@@ -81,13 +80,13 @@ def remove_client_from_all_rooms(client_socket):
         clients[room_id] = [(sock, user) for sock, user in clients[room_id] if sock != client_socket]
 
         if len(clients[room_id]) < original_len:
-            print(f"[-] Removed client from room {room_id}")
+            print(f"[-] Removed client from room {room_id}", flush=True)
 
         if not clients[room_id]:
             del clients[room_id]
 
 def handle_client(client_socket: socket.socket, client_address):
-    print(f"[+] Accepted connection from {client_address}")
+    print(f"[+] Accepted connection from {client_address}", flush=True)
     current_session_username = None
     is_session_authenticated = False
     room_id = None
@@ -96,12 +95,12 @@ def handle_client(client_socket: socket.socket, client_address):
             try:
                 room_id = client_socket.recv(4)
                 if not room_id:
-                    print(f"[-] Missing client room id")
+                    print(f"[-] Missing client room id", flush=True)
                     break
                 room_id = struct.unpack("<I", room_id)[0]
-                print(f"[+] Received room {room_id}")
+                print(f"[+] Received room {room_id}", flush=True)
             except:
-                print(f"[-] Error while receiving room id")
+                print(f"[-] Error while receiving room id", flush=True)
                 break
             
             try:
@@ -114,40 +113,39 @@ def handle_client(client_socket: socket.socket, client_address):
                     if counter >= 5:
                         break
 
-                print('Done receiving!')
+                print('Done receiving!', flush=True)
 
                 if not data:
-                    print(f"[-] Client {client_address} (User: {current_session_username}) disconnected (received empty data).")
+                    print(f"[-] Client {client_address} (User: {current_session_username}) disconnected (received empty data).", flush=True)
                     break
-                print(f"[+] Received data from {client_address} (User: {current_session_username}): {data}")
+                print(f"[+] Received data from {client_address} (User: {current_session_username}): {data}", flush=True)
                 data = data.strip(b'\0').decode()
 
                 parts = data.split(delimiter, maxsplit=5)
                 if len(parts) != 6:     # action | username | token | type | message |
-                    print(len(parts)) 
                     client_socket.send(CURRENT_CLIENT + f'{BadRequest}'.encode())
-                    print(f"[-] Sent BadRequest to {client_address} (incorrect parts).")
+                    print(f"[-] Sent BadRequest to {client_address} (incorrect parts).", flush=True)
                     continue
 
                 action, username, token, msg_type, message, _ = parts
 
                 if msg_type == Text:
-                    print(f"[+] Received from {client_address} (User: {current_session_username}): {data}")
+                    print(f"[+] Received from {client_address} (User: {current_session_username}): {data}", flush=True)
                     msg_type = Text
                 elif msg_type == Image:
-                    print(f"[+] Received an image from {client_address} (User: {current_session_username})")
+                    print(f"[+] Received an image from {client_address} (User: {current_session_username})", flush=True)
                     msg_type = Image
                 else:
-                    print("[-] Invalid message type!")
+                    print("[-] Invalid message type!", flush=True)
                     client_socket.send(f'{BadRequest}'.encode())
                     continue
 
                 if action == SendMessage:
                     if not check_auth(username, token):
                         client_socket.send(CURRENT_CLIENT + f'{InvalidCredentials}'.encode())
-                        print(f"[-] Sent InvalidCredentials to {username}@{client_address}.")
+                        print(f"[-] Sent InvalidCredentials to {username}@{client_address}.", flush=True)
                         continue
-                    print("Authenticated user:", username)
+                    print("Authenticated user:", username, flush=True)
                     # Authenticated for this message
                     if not is_session_authenticated:
                         current_session_username = username
@@ -156,19 +154,19 @@ def handle_client(client_socket: socket.socket, client_address):
                         if room_id not in clients:
                             clients[room_id] = []
                         clients[room_id].append((client_socket, current_session_username))
-                        print(f"[+] User '{current_session_username}' from {client_address} session authenticated.")
+                        print(f"[+] User '{current_session_username}' from {client_address} session authenticated.", flush=True)
 
                     if not message: # Empty message content
-                        print(f"[-] User '{current_session_username}' sent an empty message, dropping...")
+                        print(f"[-] User '{current_session_username}' sent an empty message, dropping...", flush=True)
                         client_socket.send(CURRENT_CLIENT + f'{Success}'.encode()) # Do nothing else
                         continue
                     
                     # Process and acknowledge the message
-                    print(f"[+] Message from '{current_session_username}': {message}")
+                    print(f"[+] Message from '{current_session_username}': {message}", flush=True)
                     client_socket.send(CURRENT_CLIENT + f'{Success}'.encode()) # Send '0' for success
                     
                     # Broadcast the message
-                    print(f'[+] Broadcasting message...')
+                    print(f'[+] Broadcasting message...', flush=True)
 
                     broadcast_message(
                         message_payload = f"{message}", 
@@ -180,25 +178,25 @@ def handle_client(client_socket: socket.socket, client_address):
 
                 else:
                     client_socket.send(CURRENT_CLIENT + f'{BadRequest}'.encode()) # Unknown action
-                    print(f"[-] Sent BadRequest to {client_address} (unknown action: {action}).")
+                    print(f"[-] Sent BadRequest to {client_address} (unknown action: {action}).", flush=True)
             
             except socket.timeout:
                 # print(f"[?] Timeout waiting for data from {client_address}. Still connected.")
                 # You can send a PING here or just continue
                 continue 
             except (ConnectionResetError, ConnectionAbortedError) as e:
-                print(f"[-] Client {client_address} (User: {current_session_username}) connection error: {e}")
+                print(f"[-] Client {client_address} (User: {current_session_username}) connection error: {e}", flush=True)
                 break
             except Exception as e:
-                print(f"[-] Error processing message from {client_address} (User: {current_session_username}): {str(e)}")
+                print(f"[-] Error processing message from {client_address} (User: {current_session_username}): {str(e)}", flush=True)
                 try:
                     client_socket.send(f'{UnexpectedError}'.encode())
                 except Exception as send_e:
-                    print(f"[-] Failed to send UnexpectedError to {client_address}: {send_e}")
+                    print(f"[-] Failed to send UnexpectedError to {client_address}: {send_e}", flush=True)
                 break # Exit loop on other critical errors
 
     finally:
-        print(f"[-] Closing connection for {client_address} (User: {current_session_username}).")
+        print(f"[-] Closing connection for {client_address} (User: {current_session_username}).", flush=True)
         # Remove client from list
         remove_client_from_all_rooms(client_socket)
         client_socket.close()
@@ -207,7 +205,7 @@ def run_chat_server():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((HOST, PORT))
     server.listen(5)
-    print(f"[+] Server is listening on {HOST}:{PORT}")
+    print(f"[+] Server is listening on {HOST}:{PORT}", flush = True)
     
     try:
         while True:

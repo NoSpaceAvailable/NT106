@@ -4,4 +4,4 @@ WORKDIR /app
 COPY server_loadbalancing.py .
 COPY servers.json .
 
-CMD ["sh", "-c", "python3 server_loadbalancing.py $HOST $PORT"]
+CMD ["sh", "-c", "python3 -u server_loadbalancing.py $HOST $PORT"]

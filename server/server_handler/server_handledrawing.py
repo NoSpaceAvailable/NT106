@@ -221,7 +221,7 @@ def handle_client(client_socket, addr):
                     if snapshot:
                         canvas = snapshot
                     else:
-                        canvas = Image.new("RGB", (width, height), (255, 255, 255))
+                        canvas = Image.new("RGB", (width, height), (255, 255, 255, 1))
                     
                     rooms[room_id] = {
                         "canvas": canvas,
