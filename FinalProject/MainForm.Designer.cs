@@ -216,9 +216,9 @@ namespace FinalProject
         private System.Windows.Forms.Button button1;
         private Button button2;
         private Button OpenChatBtn;
-        private TextBox IPAddressTextBox;
+        public TextBox IPAddressTextBox;
         private Label label1;
         private Label label2;
-        private TextBox PortTextBox;
+        public TextBox PortTextBox;
     }
 }

@@ -82,6 +82,24 @@ services:
       - OUT_PORT=3005
     networks:
       - drawnet
+
+  authserver:
+    build:
+      context: server_handler
+      dockerfile: Dockerfile.authserver
+    ports:
+      - '10000:10000'
+    networks:
+      - drawnet
+
+  chatserver:
+    build:
+      context: server_handler
+      dockerfile: Dockerfile.chatserver
+    ports:
+      - '10001:10001'
+    networks:
+      - drawnet
   
   database:
     build: ./postgresql

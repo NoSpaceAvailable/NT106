@@ -1,5 +1,6 @@
 import socket
 import threading
+import struct
 
 HOST = '0.0.0.0'
 PORT = 10001
@@ -27,6 +28,8 @@ UnexpectedError = '6'
 Text = '0'
 Image = '1'
 
+CURRENT_CLIENT = b'\x01'
+OTHER_CLIENT = b'\x02'
 
 delimiter = '|'
 PACK_SIZE = 1024
@@ -63,7 +66,7 @@ def broadcast_message(message_payload, message_type, message_sender_username, or
                 # Where action is Broadcast
                 broadcast_msg_str = f'{Broadcast}|{message_sender_username}|{message_type}|{message_payload}|'
                 print(f'[+] Broadcasting payload: {broadcast_msg_str}')
-                client_sock.sendall(broadcast_msg_str.encode())
+                client_sock.sendall(OTHER_CLIENT + broadcast_msg_str.encode())
             except Exception as e:
                 print(f"[-] Error broadcasting to {client_user}: {str(e)}. Removing client.")
                 clients.remove((client_sock, client_user)) # Remove problematic client
@@ -78,13 +81,21 @@ def handle_client(client_socket: socket.socket, client_address):
     try:
         while True:
             try:
-                client_socket.settimeout(3) # Timeout for recv
+                room_id = client_socket.recv(4)
+                if not room_id:
+                    print(f"[-] Missing client room id")
+                    break
+                room_id = struct.unpack("<I", room_id)
+                print(f"[+] Received {client_socket} {room_id}")
+            except:
+                print(f"[-] Error while receiving room id")
+                break
+
+            try:
                 data = b''
                 counter = 0
                 while True:
-                    print(counter)
                     pack = client_socket.recv(PACK_SIZE)
-                    print(pack)
                     data += pack
                     counter += pack.count(b'|')     # receive until the total of delimiter found is >= 5
                     if counter >= 5:
@@ -101,7 +112,7 @@ def handle_client(client_socket: socket.socket, client_address):
                 parts = data.split(delimiter, maxsplit=5)
                 if len(parts) != 6:     # action | username | token | type | message |
                     print(len(parts)) 
-                    client_socket.send(f'{BadRequest}'.encode())
+                    client_socket.send(CURRENT_CLIENT + f'{BadRequest}'.encode())
                     print(f"[-] Sent BadRequest to {client_address} (incorrect parts).")
                     continue
 
@@ -120,7 +131,7 @@ def handle_client(client_socket: socket.socket, client_address):
 
                 if action == SendMessage:
                     if not check_auth(username, token):
-                        client_socket.send(f'{InvalidCredentials}'.encode())
+                        client_socket.send(CURRENT_CLIENT + f'{InvalidCredentials}'.encode())
                         print(f"[-] Sent InvalidCredentials to {username}@{client_address}.")
                         continue
                     
@@ -135,12 +146,12 @@ def handle_client(client_socket: socket.socket, client_address):
 
                     if not message: # Empty message content
                         print(f"[-] User '{current_session_username}' sent an empty message, dropping...")
-                        client_socket.send(f'{Success}'.encode()) # Do nothing else
+                        client_socket.send(CURRENT_CLIENT + f'{Success}'.encode()) # Do nothing else
                         continue
                     
                     # Process and acknowledge the message
                     print(f"[+] Message from '{current_session_username}': {message}")
-                    client_socket.send(f'{Success}'.encode()) # Send '0' for success
+                    client_socket.send(CURRENT_CLIENT + f'{Success}'.encode()) # Send '0' for success
                     
                     # Broadcast the message
                     print(f'[+] Broadcasting message...')
@@ -152,7 +163,7 @@ def handle_client(client_socket: socket.socket, client_address):
                     )
 
                 else:
-                    client_socket.send(f'{BadRequest}'.encode()) # Unknown action
+                    client_socket.send(CURRENT_CLIENT + f'{BadRequest}'.encode()) # Unknown action
                     print(f"[-] Sent BadRequest to {client_address} (unknown action: {action}).")
             
             except socket.timeout:

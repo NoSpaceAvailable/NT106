@@ -38,9 +38,10 @@
             // 
             this.ConnectBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.ConnectBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ConnectBtn.Location = new System.Drawing.Point(10, 64);
+            this.ConnectBtn.Location = new System.Drawing.Point(29, 79);
+            this.ConnectBtn.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.ConnectBtn.Name = "ConnectBtn";
-            this.ConnectBtn.Size = new System.Drawing.Size(88, 35);
+            this.ConnectBtn.Size = new System.Drawing.Size(117, 43);
             this.ConnectBtn.TabIndex = 4;
             this.ConnectBtn.Text = "Connect";
             this.ConnectBtn.UseVisualStyleBackColor = true;
@@ -50,9 +51,10 @@
             // 
             this.DisconnectBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.DisconnectBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.DisconnectBtn.Location = new System.Drawing.Point(197, 64);
+            this.DisconnectBtn.Location = new System.Drawing.Point(263, 79);
+            this.DisconnectBtn.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.DisconnectBtn.Name = "DisconnectBtn";
-            this.DisconnectBtn.Size = new System.Drawing.Size(92, 35);
+            this.DisconnectBtn.Size = new System.Drawing.Size(123, 43);
             this.DisconnectBtn.TabIndex = 7;
             this.DisconnectBtn.Text = "Disconnect";
             this.DisconnectBtn.UseVisualStyleBackColor = true;
@@ -62,31 +64,33 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(19, 29);
+            this.label3.Location = new System.Drawing.Point(25, 36);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(61, 16);
+            this.label3.Size = new System.Drawing.Size(76, 20);
             this.label3.TabIndex = 9;
             this.label3.Text = "Room id:";
             // 
             // RoomTextBox
             // 
             this.RoomTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.RoomTextBox.Location = new System.Drawing.Point(82, 26);
+            this.RoomTextBox.Location = new System.Drawing.Point(109, 37);
+            this.RoomTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.RoomTextBox.MaxLength = 5;
-            this.RoomTextBox.Multiline = true;
             this.RoomTextBox.Name = "RoomTextBox";
-            this.RoomTextBox.Size = new System.Drawing.Size(208, 23);
+            this.RoomTextBox.Size = new System.Drawing.Size(277, 22);
             this.RoomTextBox.TabIndex = 8;
             // 
             // RemoteColorEditor
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(314, 116);
+            this.ClientSize = new System.Drawing.Size(419, 143);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.RoomTextBox);
             this.Controls.Add(this.DisconnectBtn);
             this.Controls.Add(this.ConnectBtn);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "RemoteColorEditor";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Remote Color Editor (RCE)";
@@ -99,6 +103,6 @@
         private System.Windows.Forms.Button ConnectBtn;
         private System.Windows.Forms.Button DisconnectBtn;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox RoomTextBox;
+        public System.Windows.Forms.TextBox RoomTextBox;
     }
 }

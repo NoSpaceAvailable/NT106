@@ -11,7 +11,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static FinalProject.RemoteColorEditor;
 
 namespace FinalProject
 {
@@ -38,10 +37,10 @@ namespace FinalProject
         private String authToken = null;
 
         // data for chat handler
-        private int room_id = -1;
+        public int room_id = -1;
 
         // singleton object
-        private ChatForm chat = null;
+        public ChatForm chat = null;
 
         public enum ShapeType
         {
@@ -617,9 +616,8 @@ namespace FinalProject
             //    return;
             //}
             if (remotecoloreditor == null || remotecoloreditor.IsDisposed)
-                remotecoloreditor = new RemoteColorEditor(this, IPAddressTextBox.Text, PortTextBox.Text);
+                remotecoloreditor = new RemoteColorEditor(this);
             remotecoloreditor.ShowDialog();
-            this.room_id = remotecoloreditor.room_id;
         }
 
         public void cleanGraphics()
@@ -662,11 +660,6 @@ namespace FinalProject
             DrawingArea.Invalidate();
         }
 
-        public void renderGraphic()
-        {
-
-        }
-
         private void button2_Click(object sender, EventArgs e)
         {
             if (this.isAuthenticated == true || this.username != null || this.authToken != null)
@@ -694,7 +687,7 @@ namespace FinalProject
                 MessageBox.Show("Invalid ip address. Please enter a valid ip address");
                 return;
             }
-            Authentication authentication = new Authentication(IPAddressTextBox.Text.Trim());
+            Authentication authentication = new Authentication(this);
             authentication.ShowDialog();
             Object token = authentication.GetJWTToken();
             if (token != null)
@@ -712,15 +705,28 @@ namespace FinalProject
 
         private void OpenChatBtn_Click(object sender, EventArgs e)
         {
-            if (room_id <= 0)
+            if (room_id <= 0 || remotecoloreditor == null || !remotecoloreditor.Live())
             {
                 MessageBox.Show("RCE please!");
                 return;
             }
             if (this.chat == null || this.chat.IsDisposed)
             {
-                this.chat = new ChatForm(this.username, this.authToken, IPAddressTextBox.Text);
+                this.chat = new ChatForm(this, this.username, this.authToken);
             }
+            this.chat.Show();
+        }
+
+        public void NewChat()
+        {
+            if (room_id <= 0 || remotecoloreditor == null || !remotecoloreditor.Live())
+            {
+                MessageBox.Show("RCE please!");
+                return;
+            }
+            if (this.chat != null)
+                chat.Close();
+            this.chat = new ChatForm(this, this.username, this.authToken);
             this.chat.Show();
         }
     }

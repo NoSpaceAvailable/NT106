@@ -15,20 +15,16 @@ namespace FinalProject
     public partial class RemoteColorEditor : Form
     {
         private MainForm mainForm;
-        private String remote_addr;
-        private String remote_port;
-
         public int room_id;
-
+        private const byte DRAW = 2;
+        private byte[] prefix = BitConverter.GetBytes(DRAW);
         public RemoteColorEditor()
         {
             InitializeComponent();
         }
 
-        public RemoteColorEditor(MainForm form, String ip, String port)
+        public RemoteColorEditor(MainForm form)
         {
-            this.remote_addr = ip;
-            this.remote_port = port;
             InitializeComponent();
             mainForm = form;
         }
@@ -82,7 +78,8 @@ namespace FinalProject
                 string json = JsonSerializer.Serialize(packet);
                 byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
                 byte[] lengthPrefix = BitConverter.GetBytes(jsonBytes.Length);
-                byte[] roomid = BitConverter.GetBytes(this.room_id);
+                byte[] roomid = BitConverter.GetBytes(this.room_id); 
+                stream.Write(prefix, 0, prefix.Length); // Prefix for load balancing
                 stream.Write(roomid, 0, roomid.Length);
                 stream.Write(lengthPrefix, 0, lengthPrefix.Length);
                 stream.Write(jsonBytes, 0, jsonBytes.Length);
@@ -149,7 +146,7 @@ namespace FinalProject
 
             try
             {
-                IPAddress.Parse(this.remote_addr);
+                IPAddress.Parse(mainForm.IPAddressTextBox.Text.Trim());
             }
             catch
             {
@@ -157,7 +154,7 @@ namespace FinalProject
                 return;
             }
 
-            if (int.TryParse(this.remote_port, out port) == false)
+            if (int.TryParse(mainForm.PortTextBox.Text.Trim(), out port) == false)
             {
                 MessageBox.Show("Invalid port");
                 return;
@@ -171,7 +168,7 @@ namespace FinalProject
 
             try
             {
-                ConnectToServer(this.remote_addr, port, room);
+                ConnectToServer(mainForm.IPAddressTextBox.Text.Trim(), port, room);
             }
             catch (Exception ex)
             {
@@ -221,13 +218,17 @@ namespace FinalProject
                     client = new TcpClient(ipAddress, port);
                     MessageBox.Show("Connected to server");
                     NetworkStream stream = client.GetStream();
-                    byte[] lengthPrefix = BitConverter.GetBytes(room);
-                    stream.Write(lengthPrefix, 0, lengthPrefix.Length);
+                    byte[] room_id = BitConverter.GetBytes(room);
+                    byte[] prefix = BitConverter.GetBytes(DRAW);
+                    stream.Write(prefix, 0, prefix.Length); // Prefix for load balancing
+                    stream.Write(room_id, 0, room_id.Length);
                     this.room_id = room;
                     Task.Run(() => Client());
                     ConnectBtn.Enabled = false;
                     RoomTextBox.ReadOnly = true;
                     this.Hide();
+                    mainForm.room_id = room;
+                    mainForm.NewChat();
                 }
                 else if (client != null)
                 {
@@ -237,13 +238,18 @@ namespace FinalProject
             }
             catch
             {
-                MessageBox.Show($"Cannot connect to server {this.remote_addr} {port} {room}");
+                MessageBox.Show($"Cannot connect to server {ipAddress} {port} {room}");
                 client = null;
                 ConnectBtn.Enabled = true;
                 RoomTextBox.ReadOnly = false;
                 this.Hide();
             }
 
+        }
+
+        public bool Live()
+        {
+            return client != null && client.Connected && !ConnectBtn.Enabled;
         }
     }
 }

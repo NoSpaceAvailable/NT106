@@ -26,6 +26,7 @@ PACKAGE_FROM_ANOTHER_SERVER = b'\x04'
 SYNC_CLIENT = b'\x05'
 DONE = b'\x06'
 
+
 lock = threading.Lock()
 
 time.sleep(1)  # Ensure the database is ready before connecting 
@@ -180,7 +181,8 @@ def handle_client(client_socket, addr):
     room_id = None
     try:
         while True:
-            State = client_socket.recv(1)
+            
+            State = client_socket.recv(1)    
             while not State:
                 State = client_socket.recv(1)
                 if client_socket.fileno() == -1:

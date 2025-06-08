@@ -1,0 +1,9 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+COPY requirements.txt ./requirements.txt
+COPY server_chat_handler.py ./server_chat_handler.py
+
+RUN pip install -r requirements.txt
+
+CMD ["sh", "-c", "python3 server_chat_handler.py"]

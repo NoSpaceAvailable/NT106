@@ -2,10 +2,12 @@ import socket
 import sqlite3
 from hashlib import md5
 import threading
+import struct
 
 HOST = '0.0.0.0'
 PORT = 10000
 lock = threading.Lock()
+
 
 db = 'users.db'
 secret = b'0b6825b36ec7459e37d7e463a19daa44a9b5cc63dd98146fccb525552dd086ca'
@@ -122,7 +124,7 @@ def handle_client(client_socket, client_address):
             else:
                 response = f'{BadRequest}'
 
-        client_socket.send(response.encode())
+        client_socket.send(struct.pack("<I", len(response)) + response.encode())
         print(f"[+] Sent: {response}")
     except Exception as e:
         print(f"[-] Error handling client {client_address}: {str(e)}")

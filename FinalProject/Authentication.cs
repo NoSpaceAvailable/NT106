@@ -11,10 +11,14 @@ namespace FinalProject
     public partial class Authentication : Form
     {
         private String IPAddr = "127.0.0.1";
-        private readonly int Port = 10000;    // this will be fixed
+        private int Port;    // this will be fixed
         private char delimiter = '|';
+        private MainForm mainForm = null;
 
         private int BUFF_SIZE = 1024; // bytes
+
+        private const byte LOGIN = 1;
+        private byte[] prefix = BitConverter.GetBytes(LOGIN);
 
         private String JWTtoken = String.Empty;
         private String username = String.Empty;
@@ -44,10 +48,16 @@ namespace FinalProject
             InitializeComponent();
         }
 
-        public Authentication(String ipAddr)
+        public Authentication(MainForm form)
         {
             InitializeComponent();
-            this.IPAddr = ipAddr;
+            mainForm = form;
+            this.IPAddr = mainForm.IPAddressTextBox.Text.Trim();
+            if (!int.TryParse(mainForm.PortTextBox.Text.Trim(), out Port) || Port < 0 || Port > 65535)
+            {
+                MessageBox.Show("Invalid port number! Please enter a valid port number (0-65535).");
+                this.Close();
+            }
         }
 
         public Object GetJWTToken()
@@ -113,6 +123,7 @@ namespace FinalProject
                 String dataToSend = $"{action}{delimiter}{username}{delimiter}{password}";
 
                 byte[] sendBuffer = Encoding.UTF8.GetBytes(dataToSend);
+                stream.Write(prefix, 0, prefix.Length); // Prefix for load balancing
                 stream.Write(sendBuffer, 0, sendBuffer.Length);
 
                 byte[] reveiceBuffer = new byte[BUFF_SIZE];

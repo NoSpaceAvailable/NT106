@@ -12,9 +12,12 @@ namespace FinalProject
     public partial class ChatForm : Form
     {
         private String AuthToken = String.Empty;
-        private String RemoteHost = "127.0.0.1";
-        private readonly int RemotePort = 10001;
+        private String RemoteHost;
+        private MainForm mainForm = null;
+        private int RemotePort;
         private readonly int BUFF_SIZE = 1024; // bytes
+        private const byte CHAT = 3;
+        private byte[] prefix = BitConverter.GetBytes(CHAT);
 
         private String username = String.Empty;
 
@@ -56,12 +59,18 @@ namespace FinalProject
             If the message is an image, it must be a hex string of the compressed image
          */
 
-        public ChatForm(String username, String token, String remoteHost)
+        public ChatForm(MainForm form, String username, String token)
         {
             InitializeComponent();
+            mainForm = form;
             this.username = username;
             this.AuthToken = token;
-            this.RemoteHost = remoteHost;
+            this.RemoteHost = mainForm.IPAddressTextBox.Text.Trim();
+            if (!int.TryParse(mainForm.PortTextBox.Text.Trim(), out RemotePort) || RemotePort <= 0)
+            {
+                MessageBox.Show("Invalid port number. Please enter a valid port.");
+                this.Close();
+            }
 
             // warm up connection
             this.Load += new EventHandler(ChatForm_Load);
@@ -83,6 +92,7 @@ namespace FinalProject
 
                 // Send a single warm-up message to authenticate the session
                 byte[] initialMessage = Encoding.UTF8.GetBytes($"{(int)Action.SendMessage}|{this.username}|{this.AuthToken}|{(int)MessageType.Text}||");
+                this.networkStream.Write(prefix, 0, prefix.Length);
                 this.networkStream.Write(initialMessage, 0, initialMessage.Length);
 
                 // image too large, longer buffer
@@ -206,7 +216,7 @@ namespace FinalProject
         {
             if (hex.Length % 2 != 0)
             {
-                Console.WriteLine("Error: Hexadecimal string must have an even number of characters.");
+                MessageBox.Show("Error: Hexadecimal string must have an even number of characters.");
                 return null;
             }
             try
@@ -221,12 +231,12 @@ namespace FinalProject
             }
             catch (FormatException)
             {
-                Console.WriteLine("Error: Invalid character found in hexadecimal string.");
+                MessageBox.Show("Error: Invalid character found in hexadecimal string.");
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error converting hex to byte array: {ex.Message}");
+                MessageBox.Show($"Error converting hex to byte array: {ex.Message}");
                 return null;
             }
         }
@@ -294,6 +304,9 @@ namespace FinalProject
             {
                 String msg = $"{(int)Action.SendMessage}|{this.username}|{this.AuthToken}|{type}|{message}|";
                 byte[] messageBytes = Encoding.UTF8.GetBytes(msg);
+                byte[] room = BitConverter.GetBytes(mainForm.room_id);
+                this.networkStream.Write(prefix, 0, prefix.Length); // Prefix for load balancing
+                this.networkStream.Write(room, 0, room.Length);
                 this.networkStream.Write(messageBytes, 0, messageBytes.Length);
             }
             catch (Exception ex)
@@ -309,7 +322,7 @@ namespace FinalProject
 
         private void SendChatBtn_Click(object sender, EventArgs e)
         {
-            if (String.IsNullOrWhiteSpace(ChatInputBox.Text))
+            if (String.IsNullOrWhiteSpace(ChatInputBox.Text.Trim()))
             {
                 return; // Don't send empty messages
             }

@@ -1,0 +1,9 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+COPY requirements.txt ./requirements.txt
+COPY server_auth_handler.py ./server_auth_handler.py
+
+RUN pip install -r requirements.txt
+
+CMD ["sh", "-c", "python3 server_auth_handler.py"]
