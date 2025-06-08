@@ -98,7 +98,7 @@ namespace FinalProject
                 this.networkStream.Write(initialMessage, 0, initialMessage.Length);
 
                 // image too large, longer buffer
-                byte[] buffer = new byte[BUFF_SIZE * 512];
+                byte[] buffer = new byte[BUFF_SIZE * 1000];
                 byte[] tmp = new byte[8];
                 int bytesRead;
                 while (true)

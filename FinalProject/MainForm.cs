@@ -692,7 +692,7 @@ namespace FinalProject
             Object token = authentication.GetJWTToken();
             if (token != null)
             {
-                MessageBox.Show($"Authentication successful! {token}");
+                MessageBox.Show($"Logged in!");
                 this.isAuthenticated = true;
                 this.authToken = (String)token;
                 this.username = authentication.GetUsername();
