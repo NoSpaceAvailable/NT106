@@ -56,7 +56,6 @@
             this.ConnectBtn.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.ConnectBtn.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.ConnectBtn.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.ConnectBtn.FillColor = System.Drawing.Color.MediumTurquoise;
             this.ConnectBtn.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.ConnectBtn.ForeColor = System.Drawing.Color.White;
             this.ConnectBtn.Location = new System.Drawing.Point(30, 85);
@@ -77,7 +76,6 @@
             this.DisconnectBtn.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.DisconnectBtn.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.DisconnectBtn.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.DisconnectBtn.FillColor = System.Drawing.Color.MediumTurquoise;
             this.DisconnectBtn.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.DisconnectBtn.ForeColor = System.Drawing.Color.White;
             this.DisconnectBtn.Location = new System.Drawing.Point(290, 85);
@@ -101,6 +99,7 @@
             this.RoomTextBox.DisabledState.PlaceholderForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
             this.RoomTextBox.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.RoomTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.RoomTextBox.ForeColor = System.Drawing.Color.Black;
             this.RoomTextBox.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.RoomTextBox.Location = new System.Drawing.Point(130, 31);
             this.RoomTextBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);

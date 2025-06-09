@@ -62,6 +62,7 @@ namespace FinalProject
             this.ChatInputBox.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.ChatInputBox.Location = new System.Drawing.Point(70, 709);
             this.ChatInputBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.ChatInputBox.Multiline = true;
             this.ChatInputBox.Name = "ChatInputBox";
             this.ChatInputBox.PlaceholderForeColor = System.Drawing.Color.Transparent;
             this.ChatInputBox.PlaceholderText = "";
