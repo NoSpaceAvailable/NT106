@@ -42,6 +42,8 @@ round_robin_index = 0
 health_lock = threading.Lock()  # Lock for SERVER_HEALTH
 selection_lock = threading.Lock()  # Lock for server selection and round_robin_index
 
+FAILED_SEND_CACHE = {}
+
 def load_servers_from_json(path="servers.json"):
     global SERVERS, SERVER_HEALTH
     try:
@@ -114,6 +116,12 @@ def forward_data(source_sock, dest_sock, direction, stop_event, type_header):
     try:
         is_client_to_server = "to server" in direction
         first_time = True
+        addr = None
+        if is_client_to_server:
+            try:
+                addr = source_sock.getpeername()
+            except:
+                addr = None
         while not stop_event.is_set():
             readable, _, _ = select.select([source_sock], [], [], 1.0)
             if not readable:
@@ -174,7 +182,16 @@ def forward_data(source_sock, dest_sock, direction, stop_event, type_header):
                         data_to_send += data
                         print(f"[DEBUG] Total data to send: {len(data_to_send)} bytes", flush=True)
                         print(f"[DEBUG] Data to send: {data_to_send[:50].hex()}...", flush=True)
-                    dest_sock.sendall(data_to_send)
+                    try:
+                        dest_sock.sendall(data_to_send)
+                    except Exception as e:
+                        print(f"[!] Failed to send to server: {e}", flush=True)
+                        if addr is not None:
+                            if addr not in FAILED_SEND_CACHE:
+                                FAILED_SEND_CACHE[addr] = []
+                            FAILED_SEND_CACHE[addr].append(data_to_send)
+                        stop_event.set()
+                        break
                     CONNECTED_IP[source_sock.getpeername()] = 1
 
                 elif type_header == CHAT_HEADER:
@@ -319,6 +336,23 @@ def handle_client(client_sock, addr):
 
             print(f"[+] Connected to server {best_server['host']}:{best_server['in_port']} for client {addr}", flush=True)
 
+        
+            if Type == DRAW_HEADER and addr in FAILED_SEND_CACHE:
+                cached_data_list = FAILED_SEND_CACHE[addr]
+                room_id = ROOMS.get(addr, 0)
+                for cached_data in cached_data_list:
+                    resend_data = DRAW_CHANGE_SERVER + struct.pack('<I', room_id)
+                    if cached_data.startswith(DRAW_FIRST_CONNECT) or cached_data.startswith(DRAW_ALREADY_CONNECT):
+                        resend_data += cached_data[5:]
+                    else:
+                        resend_data += cached_data
+                    try:
+                        server_sock.sendall(resend_data)
+                        print(f"[+] Resent cached data to new server for client {addr}", flush=True)
+                    except Exception as e:
+                        print(f"[!] Failed to resend cached data: {e}", flush=True)
+                        break
+                del FAILED_SEND_CACHE[addr]
             stop_event = threading.Event()
 
             client_to_server = threading.Thread(
@@ -364,6 +398,8 @@ def handle_client(client_sock, addr):
         client_sock.close()
         del CONNECTED_IP[addr]
         del ROOMS[addr]
+        if addr in FAILED_SEND_CACHE:
+            del FAILED_SEND_CACHE[addr]
     except:
         pass
     if server_sock:

@@ -28,6 +28,8 @@ DONE = b'\x06'
 
 
 lock = threading.Lock()
+SERVERS_LOCK = threading.Lock()
+UNHEALTHY_SERVERS = []
 
 time.sleep(1)  # Ensure the database is ready before connecting 
 
@@ -44,6 +46,8 @@ def load_servers_from_json(path="servers.json"):
     try:
         with open(path, "r") as f:
             SERVERS = json.load(f)
+        global UNHEALTHY_SERVERS
+        UNHEALTHY_SERVERS = []
     except Exception as e:
         print(f"[!] Failed to load server list from {path}: {e}")
         sys.exit(1)
@@ -58,20 +62,30 @@ def broadcast_to_room(room_id, message, sender_socket):
                 client.close()
 
 def broadcast_to_other_servers(package, _sync = False):
-    for server in SERVERS:
-        try:
-            print(f"[+] Broadcasting to {server['host']}:{server['in_port']}", flush=True)
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.connect((server["host"], server["in_port"]))
-            sock.sendall(package)
-            if _sync:
-                sock.recv(1)
-            sock.close()
-        except Exception as e:
-            print(f"[Error] Could not send to {server['host']}:{server['in_port']} - {e}")
-            pass
-        finally:
-            pass
+    global SERVERS, UNHEALTHY_SERVERS
+    servers_to_remove = []
+    with SERVERS_LOCK:
+        for server in SERVERS[:]:
+            try:
+                print(f"[+] Broadcasting to {server['host']}:{server['in_port']}", flush=True)
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(2)
+                sock.connect((server["host"], server["in_port"]))
+                sock.sendall(package)
+                if _sync:
+                    sock.recv(1)
+                sock.close()
+            except Exception as e:
+                print(f"[Error] Could not send to {server['host']}:{server['in_port']} - {e}")
+                servers_to_remove.append(server)
+            finally:
+                pass
+        for server in servers_to_remove:
+            if server in SERVERS:
+                SERVERS.remove(server)
+                if server not in UNHEALTHY_SERVERS:
+                    UNHEALTHY_SERVERS.append(server)
+                print(f"[!] Removed {server['host']}:{server['in_port']} from SERVERS due to failure.", flush=True)
 
 def apply_draw_packet_to_room(room, packet_bytes):
     try:
@@ -325,6 +339,24 @@ def start_server_status():
     finally:
         server_socket.close()
 
+# Health check for unhealthy servers
+def background_health_check():
+    global SERVERS, UNHEALTHY_SERVERS
+    while True:
+        time.sleep(10)
+        with SERVERS_LOCK:
+            for server in UNHEALTHY_SERVERS[:]:
+                try:
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    sock.settimeout(2)
+                    sock.connect((server["host"], server["in_port"]))
+                    sock.close()
+                    SERVERS.append(server)
+                    UNHEALTHY_SERVERS.remove(server)
+                    print(f"[+] Server {server['host']}:{server['in_port']} is healthy again and added back to SERVERS.", flush=True)
+                except Exception as e:
+                    print(f"[HealthCheck] {server['host']}:{server['in_port']} still unhealthy: {e}", flush=True)
+
 #IN_PORT for handle client connect
 #OUT_PORT for server load status
 if __name__ == "__main__":
@@ -341,6 +373,9 @@ if __name__ == "__main__":
             popped = SERVERS.pop(i)
             break
     print(f"[*] Starting server on {HOST}:{IN_PORT}\n[*] Get server load status through {HOST}:{OUT_PORT}", flush=True)
+    # Start health check thread
+    health_thread = threading.Thread(target=background_health_check, daemon=True)
+    health_thread.start()
     listening = threading.Thread(target=start_server_listening, args = (), daemon = True)
     listening.start()
     speaking = threading.Thread(target=start_server_status, args = (), daemon = True)
