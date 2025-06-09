@@ -174,6 +174,7 @@ namespace FinalProject
             this.IPAddressTextBox.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.IPAddressTextBox.Location = new System.Drawing.Point(1324, 63);
             this.IPAddressTextBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.IPAddressTextBox.MaxLength = 16;
             this.IPAddressTextBox.Name = "IPAddressTextBox";
             this.IPAddressTextBox.PlaceholderText = "";
             this.IPAddressTextBox.SelectedText = "";
@@ -198,6 +199,7 @@ namespace FinalProject
             this.PortTextBox.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.PortTextBox.Location = new System.Drawing.Point(1324, 106);
             this.PortTextBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.PortTextBox.MaxLength = 6;
             this.PortTextBox.Name = "PortTextBox";
             this.PortTextBox.PlaceholderText = "";
             this.PortTextBox.SelectedText = "";
