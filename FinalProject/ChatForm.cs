@@ -337,6 +337,16 @@ namespace FinalProject
 
         private void SendChatBtn_Click(object sender, EventArgs e)
         {
+           
+        }
+
+        private void ChooseImageBtn_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void guna2Button1_Click(object sender, EventArgs e)
+        {
             if (String.IsNullOrWhiteSpace(ChatInputBox.Text.Trim()))
             {
                 return; // Don't send empty messages
@@ -357,7 +367,7 @@ namespace FinalProject
             SendMessageToServer(actualMessage);
         }
 
-        private void ChooseImageBtn_Click(object sender, EventArgs e)
+        private void ChooseImageBtn_Click_1(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {

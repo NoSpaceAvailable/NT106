@@ -115,6 +115,9 @@
     <Compile Include="RemoteColorEditor.Designer.cs">
       <DependentUpon>RemoteColorEditor.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Authentication.resx">
+      <DependentUpon>Authentication.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ChatForm.resx">
       <DependentUpon>ChatForm.cs</DependentUpon>
     </EmbeddedResource>

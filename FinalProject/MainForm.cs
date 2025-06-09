@@ -178,6 +178,21 @@ namespace FinalProject
             DrawingArea.Cursor = customCursor;
         }
 
+        private void EnableDoubleBuffering(Control c)
+        {
+            c.GetType()
+             .GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+             ?.SetValue(c, true, null);
+        }
+
+        private void ShapeButton_Click(object sender, EventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is ShapeType shape)
+            {
+                currentShape = shape;
+            }
+        }
+
         private void LoadTools()
         {
             int buttonSize = 30;
@@ -262,20 +277,6 @@ namespace FinalProject
             lineButton.Click += ShapeButton_Click;
             ToolsPanel.Controls.Add(lineButton);
         }
-        private void EnableDoubleBuffering(Control c)
-        {
-            c.GetType()
-             .GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-             ?.SetValue(c, true, null);
-        }
-
-        private void ShapeButton_Click(object sender, EventArgs e)
-        {
-            if (sender is Button btn && btn.Tag is ShapeType shape)
-            {
-                currentShape = shape;
-            }
-        }
 
         private void LoadColorPalette()
         {
@@ -287,6 +288,7 @@ namespace FinalProject
             };
 
             int buttonSize = 30;
+            
             for (int i = 0; i <= colors.Length; i++)
             {
                 if (i == colors.Length)
@@ -610,14 +612,7 @@ namespace FinalProject
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (!isAuthenticated)
-            {
-               MessageBox.Show("Please login first!");
-               return;
-            }
-            if (remotecoloreditor == null || remotecoloreditor.IsDisposed)
-                remotecoloreditor = new RemoteColorEditor(this);
-            remotecoloreditor.ShowDialog();
+            
         }
 
         public void cleanGraphics()
@@ -662,6 +657,38 @@ namespace FinalProject
 
         private void button2_Click(object sender, EventArgs e)
         {
+            
+        }
+
+        private void OpenChatBtn_Click(object sender, EventArgs e)
+        {
+            if (room_id <= 0 || remotecoloreditor == null || !remotecoloreditor.Live())
+            {
+                MessageBox.Show("RCE please!");
+                return;
+            }
+            if (this.chat == null || this.chat.IsDisposed)
+            {
+                this.chat = new ChatForm(this, this.username, this.authToken);
+            }
+            this.chat.Show();
+        }
+
+        public void NewChat()
+        {
+            if (room_id <= 0 || remotecoloreditor == null || !remotecoloreditor.Live())
+            {
+                MessageBox.Show("RCE please!");
+                return;
+            }
+            if (this.chat != null)
+                chat.Close();
+            this.chat = new ChatForm(this, this.username, this.authToken);
+            this.chat.Show();
+        }
+
+        private void LoginBtn_Click(object sender, EventArgs e)
+        {
             if (this.isAuthenticated == true || this.username != null || this.authToken != null)
             {
                 MessageBox.Show("Already logged in!");
@@ -696,38 +723,24 @@ namespace FinalProject
                 this.isAuthenticated = true;
                 this.authToken = (String)token;
                 this.username = authentication.GetUsername();
-            } else
+            }
+            else
             {
                 MessageBox.Show("Authentication failed! Please try again.");
                 return;
             }
         }
 
-        private void OpenChatBtn_Click(object sender, EventArgs e)
+        private void RCEBtn_Click(object sender, EventArgs e)
         {
-            if (room_id <= 0 || remotecoloreditor == null || !remotecoloreditor.Live())
+            if (!isAuthenticated)
             {
-                MessageBox.Show("RCE please!");
+                MessageBox.Show("Please login first!");
                 return;
             }
-            if (this.chat == null || this.chat.IsDisposed)
-            {
-                this.chat = new ChatForm(this, this.username, this.authToken);
-            }
-            this.chat.Show();
-        }
-
-        public void NewChat()
-        {
-            if (room_id <= 0 || remotecoloreditor == null || !remotecoloreditor.Live())
-            {
-                MessageBox.Show("RCE please!");
-                return;
-            }
-            if (this.chat != null)
-                chat.Close();
-            this.chat = new ChatForm(this, this.username, this.authToken);
-            this.chat.Show();
+            if (remotecoloreditor == null || remotecoloreditor.IsDisposed)
+                remotecoloreditor = new RemoteColorEditor(this);
+            remotecoloreditor.ShowDialog();
         }
     }
 }

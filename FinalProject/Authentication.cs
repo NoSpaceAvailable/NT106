@@ -162,7 +162,7 @@ namespace FinalProject
             TitleLabel.Text = ConfirmPasswordLabel.Visible ? "Chat X register" : "Chat X login";
         }
 
-        private void LoginOrRegisterBtn_Click(object sender, EventArgs e)
+        private void LoginOrRegisterBtn_Click_1(object sender, EventArgs e)
         {
             String action = LoginOrRegisterBtn.Text;
             String username = UsernameBox.Text;
@@ -233,12 +233,6 @@ namespace FinalProject
                 ErrorTextLabel.ForeColor = System.Drawing.Color.Red;
             }
             ErrorTextLabel.Visible = true;
-        }
-
-        private void InputBox_TextChanged(object sender, EventArgs e)
-        {
-            ErrorTextLabel.Visible = false;
-            ErrorTextLabel.Text = String.Empty;
         }
     }
 }

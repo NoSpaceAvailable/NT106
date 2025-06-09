@@ -139,76 +139,6 @@ namespace FinalProject
             }
         }
 
-        private void ConnectBtn_Click(object sender, EventArgs e)
-        {
-            int port = 0;
-            int room = 0;
-
-            try
-            {
-                IPAddress.Parse(mainForm.IPAddressTextBox.Text.Trim());
-            }
-            catch
-            {
-                MessageBox.Show("Invalid ip address");
-                return;
-            }
-
-            if (int.TryParse(mainForm.PortTextBox.Text.Trim(), out port) == false)
-            {
-                MessageBox.Show("Invalid port");
-                return;
-            }
-
-            if (int.TryParse(RoomTextBox.Text.Trim(), out room) == false || room == 0)
-            {
-                MessageBox.Show("Invalid room id");
-                return;
-            }
-
-            try
-            {
-                ConnectToServer(mainForm.IPAddressTextBox.Text.Trim(), port, room);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error connecting to server: {ex.Message}");
-                client = null;
-                this.Hide();
-            }
-            
-        }
-
-        private void DisconnectBtn_Click(object sender, EventArgs e)
-        {
-            if (client == null)
-            {
-                MessageBox.Show("No connection");
-                this.Hide();
-            }
-            else
-            {
-                try
-                {
-                    if (client != null)
-                        client.Close();
-                    client = null;
-                    MessageBox.Show("Disconnected");
-                    ConnectBtn.Enabled = true;
-                    RoomTextBox.ReadOnly = false;
-                    this.Hide();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error disconnecting to server: {ex.Message}");
-                    client = null;
-                    ConnectBtn.Enabled = true;
-                    RoomTextBox.ReadOnly = false;
-                    this.Hide();
-                }
-            }
-        }
-
         private void ConnectToServer(string ipAddress, int port, int room)
         {
             try
@@ -250,6 +180,75 @@ namespace FinalProject
         public bool Live()
         {
             return client != null && client.Connected && !ConnectBtn.Enabled;
+        }
+
+        private void ConnectBtn_Click_1(object sender, EventArgs e)
+        {
+            int port = 0;
+            int room = 0;
+
+            try
+            {
+                IPAddress.Parse(mainForm.IPAddressTextBox.Text.Trim());
+            }
+            catch
+            {
+                MessageBox.Show("Invalid ip address");
+                return;
+            }
+
+            if (int.TryParse(mainForm.PortTextBox.Text.Trim(), out port) == false)
+            {
+                MessageBox.Show("Invalid port");
+                return;
+            }
+
+            if (int.TryParse(RoomTextBox.Text.Trim(), out room) == false || room == 0)
+            {
+                MessageBox.Show("Invalid room id");
+                return;
+            }
+
+            try
+            {
+                ConnectToServer(mainForm.IPAddressTextBox.Text.Trim(), port, room);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error connecting to server: {ex.Message}");
+                client = null;
+                this.Hide();
+            }
+        }
+
+        private void DisconnectBtn_Click_1(object sender, EventArgs e)
+        {
+            if (client == null)
+            {
+                MessageBox.Show("No connection");
+                this.Hide();
+            }
+            else
+            {
+                try
+                {
+                    if (client != null)
+                        client.Close();
+                    client = null;
+                    MessageBox.Show("Disconnected");
+                    ConnectBtn.Enabled = true;
+                    RoomTextBox.ReadOnly = false;
+                    this.Hide();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error disconnecting to server: {ex.Message}");
+                    client = null;
+                    ConnectBtn.Enabled = true;
+                    RoomTextBox.ReadOnly = false;
+                    this.Hide();
+                }
+            }
         }
     }
 }
