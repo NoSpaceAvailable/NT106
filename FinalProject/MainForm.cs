@@ -735,6 +735,7 @@ namespace FinalProject
             if (token != null)
             {
                 MessageBox.Show($"Logged in!");
+                Logout.Visible = true;
                 this.isAuthenticated = true;
                 this.authToken = (String)token;
                 this.username = authentication.GetUsername();
@@ -804,6 +805,23 @@ namespace FinalProject
         {
             penWidth = CursorSizeAdjust.Value;
             UpdateCursor();
+        }
+
+        private void Logout_Click(object sender, EventArgs e)
+        {
+            this.isAuthenticated = false;
+            this.username = null;
+            this.authToken = null;
+
+            if (this.chat != null)
+            {
+                if (!this.chat.IsDisposed)
+                    this.chat.Close();
+                this.chat = null;
+            }
+
+            MessageBox.Show("Logged Out!");
+            Logout.Visible = false;
         }
     }
 }

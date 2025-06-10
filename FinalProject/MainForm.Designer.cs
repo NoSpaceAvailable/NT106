@@ -33,6 +33,7 @@ namespace FinalProject
             this.PortTextBox = new Guna.UI2.WinForms.Guna2TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.SaveImg = new Guna.UI2.WinForms.Guna2Button();
+            this.Logout = new Guna.UI2.WinForms.Guna2Button();
             ((System.ComponentModel.ISupportInitialize)(this.DrawingArea)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.CursorSizeAdjust)).BeginInit();
             this.SuspendLayout();
@@ -84,7 +85,7 @@ namespace FinalProject
             this.ToolsPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(255)))), ((int)(((byte)(240)))));
             this.ToolsPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.ToolsPanel.Location = new System.Drawing.Point(415, 18);
-            this.ToolsPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ToolsPanel.Margin = new System.Windows.Forms.Padding(4);
             this.ToolsPanel.Name = "ToolsPanel";
             this.ToolsPanel.Size = new System.Drawing.Size(309, 89);
             this.ToolsPanel.TabIndex = 3;
@@ -245,6 +246,28 @@ namespace FinalProject
             this.SaveImg.Text = "💾 Save";
             this.SaveImg.Click += new System.EventHandler(this.SaveImg_Click);
             // 
+            // Logout
+            // 
+            this.Logout.Animated = true;
+            this.Logout.AnimatedGIF = true;
+            this.Logout.AutoRoundedCorners = true;
+            this.Logout.BorderColor = System.Drawing.Color.DimGray;
+            this.Logout.BorderThickness = 2;
+            this.Logout.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.Logout.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.Logout.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.Logout.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.Logout.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.Logout.ForeColor = System.Drawing.Color.White;
+            this.Logout.Location = new System.Drawing.Point(1335, 18);
+            this.Logout.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Logout.Name = "Logout";
+            this.Logout.Size = new System.Drawing.Size(109, 37);
+            this.Logout.TabIndex = 17;
+            this.Logout.Text = "Logout";
+            this.Logout.Visible = false;
+            this.Logout.Click += new System.EventHandler(this.Logout_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -252,6 +275,7 @@ namespace FinalProject
             this.AutoSize = true;
             this.BackColor = System.Drawing.Color.Snow;
             this.ClientSize = new System.Drawing.Size(1536, 894);
+            this.Controls.Add(this.Logout);
             this.Controls.Add(this.SaveImg);
             this.Controls.Add(this.PortTextBox);
             this.Controls.Add(this.IPAddressTextBox);
@@ -265,7 +289,7 @@ namespace FinalProject
             this.Controls.Add(this.DrawingArea);
             this.Controls.Add(this.ColorsPanel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.Padding = new System.Windows.Forms.Padding(13, 12, 13, 12);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -292,5 +316,6 @@ namespace FinalProject
         public Guna.UI2.WinForms.Guna2TextBox PortTextBox;
         private Label label2;
         private Guna.UI2.WinForms.Guna2Button SaveImg;
+        private Guna.UI2.WinForms.Guna2Button Logout;
     }
 }
