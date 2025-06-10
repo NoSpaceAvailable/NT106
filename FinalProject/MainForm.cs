@@ -447,7 +447,7 @@ namespace FinalProject
             else
             {
                 previewGraphics.Clear(Color.Transparent);
-                DrawShapeOnGraphics(previewGraphics, previousPoint, e.Location, currentShape, selectedColor);
+                DrawShapeOnGraphics(previewGraphics, previousPoint, e.Location, currentShape, selectedColor, penWidth);
                 DrawingArea.Invalidate();
             }
         }
@@ -459,7 +459,7 @@ namespace FinalProject
 
             if (currentShape != ShapeType.FreeDraw)
             {
-                DrawShape(previousPoint, e.Location, currentShape, selectedColor);
+                DrawShape(previousPoint, e.Location, currentShape, selectedColor, penWidth);
 
                 buffer[current_ptr++] = new Draw_data
                 {
@@ -500,17 +500,17 @@ namespace FinalProject
         }
 
         //Draw shape on buffer and render to graphics
-        private void DrawShape(Point start, Point end, ShapeType shape, Color color)
+        private void DrawShape(Point start, Point end, ShapeType shape, Color color, int penWid)
         {
             lock (lockObj)
             {
-                DrawShapeOnGraphics(bufferedGraphics.Graphics, start, end, shape, color);
+                DrawShapeOnGraphics(bufferedGraphics.Graphics, start, end, shape, color, penWid);
                 bufferedGraphics.Render(DrawingArea.CreateGraphics());
             }
         }
 
         //Draw shape on offscreen buffer
-        private void DrawShapeOnGraphics(Graphics g, Point start, Point end, ShapeType shape, Color color)
+        private void DrawShapeOnGraphics(Graphics g, Point start, Point end, ShapeType shape, Color color, int Size)
         {
             Rectangle rect = new Rectangle(
                 Math.Min(start.X, end.X),
@@ -519,7 +519,7 @@ namespace FinalProject
                 Math.Abs(end.Y - start.Y)
             );
 
-            using (Pen pen = new Pen(color, penWidth))
+            using (Pen pen = new Pen(color, Size))
             {
                 switch (shape)
                 {
@@ -591,7 +591,7 @@ namespace FinalProject
                     case UP:
                         if (x.Shape != ShapeType.FreeDraw)
                         {
-                            DrawShape(prevPoint, x.Location.ToPoint(), x.Shape, crt_color);
+                            DrawShape(prevPoint, x.Location.ToPoint(), x.Shape, crt_color, x.penWid);
                         }
                         break;
                     default:
