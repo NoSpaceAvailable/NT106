@@ -120,12 +120,16 @@ def apply_draw_packet_to_room(room, packet_bytes):
                         brush
                     )
                 elif event == 2:  # MOVE
-                    draw.line([prev, current], pen)
-                    draw.ellipse(
-                        [x - pen_width // 2, y - pen_width // 2,
-                         x + pen_width // 2, y + pen_width // 2],
-                        brush
-                    )
+                    steps = max(abs(current[0] - prev[0]), abs(current[1] - prev[1]))
+                    for i in range(steps + 1):
+                        t = i / steps
+                        interp_x = int(prev[0] + (current[0] - prev[0]) * t)
+                        interp_y = int(prev[1] + (current[1] - prev[1]) * t)
+                        draw.ellipse(
+                            [interp_x - pen_width // 2, interp_y - pen_width // 2,
+                            interp_x + pen_width // 2, interp_y + pen_width // 2],
+                            brush
+                        )
 
             elif event == 3:  # UP with Shape
                 apply_shape_agg(draw, shape, prev, current, pen)
