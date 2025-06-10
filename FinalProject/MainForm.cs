@@ -641,22 +641,25 @@ namespace FinalProject
 
         public void LoadCanvasFromBytes(byte[] data)
         {
-            using (MemoryStream ms = new MemoryStream(data))
+            try
             {
-                Image img = Image.FromStream(ms);
-
-                lock (lockObj)
+                using (MemoryStream ms = new MemoryStream(data))
                 {
-                    bufferedGraphics.Graphics.DrawImage(img, 0, 0);
-                    bufferedGraphics.Render(DrawingArea.CreateGraphics());
+                    Image img = Image.FromStream(ms);
+
+                    lock (lockObj)
+                    {
+                        bufferedGraphics.Graphics.DrawImage(img, 0, 0);
+                        bufferedGraphics.Render(DrawingArea.CreateGraphics());
+                    }
                 }
+
+                DrawingArea.Invalidate();
             }
-
-            DrawingArea.Invalidate();
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
+            catch
+            {
+                MessageBox.Show("Error while sync with room");
+            }
             
         }
 
@@ -754,20 +757,32 @@ namespace FinalProject
 
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    using (Bitmap bmp = new Bitmap(DrawingArea.Width, DrawingArea.Height))
+                    try
                     {
-                        lock (lockObj)
+                        using (Bitmap bmp = new Bitmap(DrawingArea.Width, DrawingArea.Height))
                         {
-                            bufferedGraphics.Render(Graphics.FromImage(bmp));
+                            using (Graphics g = Graphics.FromImage(bmp))
+                            {
+                                lock (lockObj)
+                                {
+                                    bufferedGraphics.Render(g);
+                                }
+                            }
+
+                            // Determine format from extension
+                            string ext = Path.GetExtension(saveFileDialog.FileName).ToLower();
+                            System.Drawing.Imaging.ImageFormat format = System.Drawing.Imaging.ImageFormat.Png;
+                            if (ext == ".jpg") format = System.Drawing.Imaging.ImageFormat.Jpeg;
+                            else if (ext == ".bmp") format = System.Drawing.Imaging.ImageFormat.Bmp;
+
+                            // Save to file safely
+                            bmp.Save(saveFileDialog.FileName, format);
+                            MessageBox.Show("Image saved successfully!", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
-
-                        string ext = Path.GetExtension(saveFileDialog.FileName).ToLower();
-                        System.Drawing.Imaging.ImageFormat format = System.Drawing.Imaging.ImageFormat.Png;
-                        if (ext == ".jpg") format = System.Drawing.Imaging.ImageFormat.Jpeg;
-                        else if (ext == ".bmp") format = System.Drawing.Imaging.ImageFormat.Bmp;
-
-                        bmp.Save(saveFileDialog.FileName, format);
-                        MessageBox.Show("Image saved successfully!", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Failed to save image:\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
