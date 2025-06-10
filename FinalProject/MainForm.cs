@@ -710,11 +710,26 @@ namespace FinalProject
             }
             try
             {
-                IPAddress.Parse(IPAddressTextBox.Text.Trim());
+                IPAddress realIP;
+                bool result = IPAddress.TryParse(IPAddressTextBox.Text.Trim(), out realIP);
+                if (!result)
+                {
+                    IPAddress[] ips = Dns.GetHostAddresses(IPAddressTextBox.Text.Trim());
+                    if (ips.Length != 1)
+                    {
+                        throw new InvalidDataException("Invalid host address");
+                    } else
+                    {
+                        IPAddressTextBox.Text = ips[0].ToString();
+                    }
+                } else
+                {
+                    throw new InvalidDataException("Invalid host address");
+                }
             }
             catch
             {
-                MessageBox.Show("Invalid ip address. Please enter a valid ip address");
+                MessageBox.Show("Invalid ip/host address. Please enter a valid one");
                 return;
             }
             Authentication authentication = new Authentication(this);
