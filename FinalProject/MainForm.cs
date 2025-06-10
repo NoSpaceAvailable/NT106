@@ -799,5 +799,11 @@ namespace FinalProject
                 }
             }
         }
+
+        private void CursorSizeAdjust_Scroll(object sender, EventArgs e)
+        {
+            penWidth = CursorSizeAdjust.Value;
+            UpdateCursor();
+        }
     }
 }
