@@ -232,7 +232,6 @@ def handle_client(client_socket, addr):
             if State == FIRST_CONNECT or State == CHANGE_SERVER:
                 if State == FIRST_CONNECT:
                     broadcast_to_other_servers(SYNC_CLIENT + struct.pack("<I", room_id), True)
-                    save_room_image_to_db(room_id, rooms[room_id]["canvas"])
                 if room_id not in rooms:
                     with lock:
                         snapshot = load_room_image_from_db(room_id)
