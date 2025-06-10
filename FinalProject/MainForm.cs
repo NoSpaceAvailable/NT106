@@ -722,9 +722,6 @@ namespace FinalProject
                     {
                         IPAddressTextBox.Text = ips[0].ToString();
                     }
-                } else
-                {
-                    throw new InvalidDataException("Invalid host address");
                 }
             }
             catch
