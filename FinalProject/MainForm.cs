@@ -742,5 +742,35 @@ namespace FinalProject
                 remotecoloreditor = new RemoteColorEditor(this);
             remotecoloreditor.ShowDialog();
         }
+
+        private void SaveImg_Click(object sender, EventArgs e)
+        {
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Title = "Save Drawing";
+                saveFileDialog.Filter = "PNG Image|*.png|JPEG Image|*.jpg|Bitmap Image|*.bmp";
+                saveFileDialog.DefaultExt = "png";
+                saveFileDialog.FileName = $"drawing_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    using (Bitmap bmp = new Bitmap(DrawingArea.Width, DrawingArea.Height))
+                    {
+                        lock (lockObj)
+                        {
+                            bufferedGraphics.Render(Graphics.FromImage(bmp));
+                        }
+
+                        string ext = Path.GetExtension(saveFileDialog.FileName).ToLower();
+                        System.Drawing.Imaging.ImageFormat format = System.Drawing.Imaging.ImageFormat.Png;
+                        if (ext == ".jpg") format = System.Drawing.Imaging.ImageFormat.Jpeg;
+                        else if (ext == ".bmp") format = System.Drawing.Imaging.ImageFormat.Bmp;
+
+                        bmp.Save(saveFileDialog.FileName, format);
+                        MessageBox.Show("Image saved successfully!", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+        }
     }
 }

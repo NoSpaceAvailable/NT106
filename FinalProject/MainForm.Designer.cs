@@ -32,6 +32,7 @@ namespace FinalProject
             this.IPAddressTextBox = new Guna.UI2.WinForms.Guna2TextBox();
             this.PortTextBox = new Guna.UI2.WinForms.Guna2TextBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.SaveImg = new Guna.UI2.WinForms.Guna2Button();
             ((System.ComponentModel.ISupportInitialize)(this.DrawingArea)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.CursorSizeAdjust)).BeginInit();
             this.SuspendLayout();
@@ -79,7 +80,7 @@ namespace FinalProject
             // 
             this.ToolsPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(255)))), ((int)(((byte)(240)))));
             this.ToolsPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.ToolsPanel.Location = new System.Drawing.Point(467, 19);
+            this.ToolsPanel.Location = new System.Drawing.Point(415, 19);
             this.ToolsPanel.Margin = new System.Windows.Forms.Padding(4);
             this.ToolsPanel.Name = "ToolsPanel";
             this.ToolsPanel.Size = new System.Drawing.Size(309, 89);
@@ -217,6 +218,26 @@ namespace FinalProject
             this.label2.TabIndex = 10;
             this.label2.Text = "Remote port";
             // 
+            // SaveImg
+            // 
+            this.SaveImg.Animated = true;
+            this.SaveImg.AnimatedGIF = true;
+            this.SaveImg.AutoRoundedCorners = true;
+            this.SaveImg.BorderRadius = 16;
+            this.SaveImg.BorderThickness = 1;
+            this.SaveImg.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.SaveImg.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.SaveImg.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.SaveImg.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.SaveImg.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.SaveImg.ForeColor = System.Drawing.Color.White;
+            this.SaveImg.Location = new System.Drawing.Point(731, 19);
+            this.SaveImg.Name = "SaveImg";
+            this.SaveImg.Size = new System.Drawing.Size(94, 35);
+            this.SaveImg.TabIndex = 16;
+            this.SaveImg.Text = "💾 Save";
+            this.SaveImg.Click += new System.EventHandler(this.SaveImg_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -224,6 +245,7 @@ namespace FinalProject
             this.AutoSize = true;
             this.BackColor = System.Drawing.Color.Snow;
             this.ClientSize = new System.Drawing.Size(1605, 893);
+            this.Controls.Add(this.SaveImg);
             this.Controls.Add(this.PortTextBox);
             this.Controls.Add(this.IPAddressTextBox);
             this.Controls.Add(this.RCEBtn);
@@ -262,5 +284,6 @@ namespace FinalProject
         public Guna.UI2.WinForms.Guna2TextBox IPAddressTextBox;
         public Guna.UI2.WinForms.Guna2TextBox PortTextBox;
         private Label label2;
+        private Guna.UI2.WinForms.Guna2Button SaveImg;
     }
 }
