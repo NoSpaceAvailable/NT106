@@ -222,7 +222,7 @@ def handle_client(client_socket, addr):
                 client_socket.close()
                 return
             
-            if State == SYNC_CLIENT or State == FIRST_CONNECT:
+            if State == SYNC_CLIENT or State == FIRST_CONNECT or State == CHANGE_SERVER:
                 if room_id in rooms:
                     save_room_image_to_db(room_id, rooms[room_id]["canvas"])
                 if State == SYNC_CLIENT:
