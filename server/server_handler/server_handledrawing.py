@@ -120,16 +120,27 @@ def apply_draw_packet_to_room(room, packet_bytes):
                         brush
                     )
                 elif event == 2:  # MOVE
-                    steps = max(abs(current[0] - prev[0]), abs(current[1] - prev[1]))
-                    for i in range(steps + 1):
-                        t = i / steps
-                        interp_x = int(prev[0] + (current[0] - prev[0]) * t)
-                        interp_y = int(prev[1] + (current[1] - prev[1]) * t)
+                    dx = current[0] - prev[0]
+                    dy = current[1] - prev[1]
+                    steps = max(abs(dx), abs(dy))
+
+                    if steps == 0:
+                        # Single point — draw one circle
                         draw.ellipse(
-                            [interp_x - pen_width // 2, interp_y - pen_width // 2,
-                            interp_x + pen_width // 2, interp_y + pen_width // 2],
+                            [current[0] - pen_width // 2, current[1] - pen_width // 2,
+                            current[0] + pen_width // 2, current[1] + pen_width // 2],
                             brush
                         )
+                    else:
+                        for i in range(steps + 1):
+                            t = i / steps
+                            interp_x = int(prev[0] + dx * t)
+                            interp_y = int(prev[1] + dy * t)
+                            draw.ellipse(
+                                [interp_x - pen_width // 2, interp_y - pen_width // 2,
+                                interp_x + pen_width // 2, interp_y + pen_width // 2],
+                                brush
+                            )
 
             elif event == 3:  # UP with Shape
                 apply_shape_agg(draw, shape, prev, current, pen)
@@ -285,6 +296,8 @@ def handle_client(client_socket, addr):
                     print(f"[+] Sending draw packet to other servers for room {room_id}", flush=True)
                     full_message = PACKAGE_FROM_ANOTHER_SERVER + struct.pack("<I", room_id) + full_message
                     broadcast_to_other_servers(full_message)
+                    with lock:
+                        save_room_image_to_db(room_id, rooms[room_id]["canvas"])
                 else:
                     return
 
