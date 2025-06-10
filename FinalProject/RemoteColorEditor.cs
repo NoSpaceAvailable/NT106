@@ -233,8 +233,8 @@ namespace FinalProject
                 try
                 {
                     if (client != null)
-                           client.Close();
-                        client = null;
+                        client.Close();
+                    client = null;
                     MessageBox.Show("Disconnected");
                     ConnectBtn.Enabled = true;
                     RoomTextBox.ReadOnly = false;
