@@ -226,8 +226,6 @@ namespace FinalProject
             if (client == null)
             {
                 MessageBox.Show("No connection");
-                ConnectBtn.Enabled = true;
-                RoomTextBox.ReadOnly = false;
                 this.Hide();
             }
             else
