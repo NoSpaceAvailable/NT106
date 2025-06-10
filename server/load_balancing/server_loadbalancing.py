@@ -306,21 +306,6 @@ def handle_client(client_sock, addr):
     best_server = None
     Type = client_sock.recv(1) #Header 2 byte
     while retry_count < max_retries:
-        if(client_sock is None or not client_sock.fileno() or not client_sock.getpeername()):
-            print(f"[!] Client {addr} disconnected or invalid socket, stopping handling", flush=True)
-            try:
-                del CONNECTED_IP[addr]
-                del ROOMS[addr]
-                if addr in FAILED_SEND_CACHE:
-                    del FAILED_SEND_CACHE[addr]
-            except:
-                pass
-            if server_sock:
-                try:
-                    server_sock.close()
-                except:
-                    pass
-            return
         if Type == DRAW_HEADER:
             best_server = choose_best_server()
             if best_server is None:
