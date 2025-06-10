@@ -125,22 +125,27 @@ def apply_draw_packet_to_room(room, packet_bytes):
                     steps = max(abs(dx), abs(dy))
 
                     if steps == 0:
-                        # Single point — draw one circle
+                        # Single point
+                        x, y = int(current[0]), int(current[1])
                         draw.ellipse(
-                            [current[0] - pen_width // 2, current[1] - pen_width // 2,
-                            current[0] + pen_width // 2, current[1] + pen_width // 2],
+                            [x - pen_width // 2, y - pen_width // 2,
+                            x + pen_width // 2, y + pen_width // 2],
                             brush
                         )
                     else:
                         for i in range(steps + 1):
                             t = i / steps
-                            interp_x = int(prev[0] + dx * t)
-                            interp_y = int(prev[1] + dy * t)
-                            draw.ellipse(
-                                [interp_x - pen_width // 2, interp_y - pen_width // 2,
-                                interp_x + pen_width // 2, interp_y + pen_width // 2],
-                                brush
-                            )
+                            interp_x = int(round(prev[0] + dx * t))
+                            interp_y = int(round(prev[1] + dy * t))
+                            bbox = [
+                                interp_x - pen_width // 2,
+                                interp_y - pen_width // 2,
+                                interp_x + pen_width // 2,
+                                interp_y + pen_width // 2
+                            ]
+                            # Ensure all values are ints
+                            bbox = list(map(int, bbox))
+                            draw.ellipse(bbox, brush)
 
             elif event == 3:  # UP with Shape
                 apply_shape_agg(draw, shape, prev, current, pen)
