@@ -347,7 +347,7 @@ def start_server_status():
 def background_health_check():
     global SERVERS, UNHEALTHY_SERVERS
     while True:
-        time.sleep(5)
+        time.sleep(10)
         with SERVERS_LOCK:
             for server in UNHEALTHY_SERVERS[:]:
                 try:
