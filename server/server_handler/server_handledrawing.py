@@ -224,7 +224,8 @@ def handle_client(client_socket, addr):
             
             if State == SYNC_CLIENT:
                 if room_id in rooms:
-                    save_room_image_to_db(room_id, rooms[room_id]["canvas"])
+                    with lock:
+                        save_room_image_to_db(room_id, rooms[room_id]["canvas"])
                 client_socket.sendall(struct.pack("<B", DONE))
                 client_socket.close()
                 return
@@ -275,6 +276,8 @@ def handle_client(client_socket, addr):
                 print(f"[+] Received data from {addr} for room {room_id}", flush=True)
                 full_message = raw_len + data
                 apply_draw_packet_to_room(room_id, full_message)
+                with lock:
+                    save_room_image_to_db(room_id, rooms[room_id]["canvas"])
                 print(f"[+] Applied draw packet to room {room_id}", flush=True)
                 broadcast_to_room(room_id, struct.pack("<I", room_id) + full_message, client_socket)
                 print(f"[+] Broadcasted draw packet to room {room_id}", flush=True)
@@ -297,7 +300,8 @@ def handle_client(client_socket, addr):
                 rooms_clients[room_id].remove(client_socket)
                 print(f"[-] Client {addr} removed from clients list of room {room_id}", flush=True)
             if room_id in rooms:
-                save_room_image_to_db(room_id, rooms[room_id]["canvas"])
+                with lock:
+                    save_room_image_to_db(room_id, rooms[room_id]["canvas"])
             if room_id in rooms_clients and not rooms_clients[room_id]:
                 rooms.pop(room_id, None)
 
@@ -347,7 +351,7 @@ def start_server_status():
 def background_health_check():
     global SERVERS, UNHEALTHY_SERVERS
     while True:
-        time.sleep(10)
+        time.sleep(5)
         with SERVERS_LOCK:
             for server in UNHEALTHY_SERVERS[:]:
                 try:
